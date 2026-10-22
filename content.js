@@ -107,6 +107,8 @@ window.SITE_CONTENT = {
     'images/tr-16.jpg', 'images/tr-17.jpg', 'images/tr-18.jpg', 'images/tr-19.jpg', 'images/tr-20.jpg'
   ]
 };
+// chaque image prend le tirage du thème et de l'écran (theme.js)
+if (window.NubiaaTheme) window.NubiaaTheme.fixData(window.SITE_CONTENT);
 
 /* ═══════════════════════════════════════════════════════════
    INJECTION — NE PAS MODIFIER (remplit le DOM avant app.js)

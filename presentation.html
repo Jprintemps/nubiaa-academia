@@ -6,9 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Template Site Immersif</title>
   <meta name="description" content="Site généré depuis le template Site Immersif.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="presentation-extras.css">
   <link rel="icon" href="favicon.png" media="(prefers-color-scheme: dark)">
@@ -36,16 +35,16 @@
       <div class="pin">
 
         <div class="floaters" aria-hidden="true">
-          <figure class="fl" style="--x:-4%;  --y:13%; --w:196px" data-d="0.55"><img src="images/tr-01.jpg" alt=""></figure>
-          <figure class="fl" style="--x:21%;   --y:3%; --w:142px" data-d="0.90"><img src="images/fl-02.jpg" alt=""></figure>
-          <figure class="fl" style="--x:40%;  --y:-8%; --w:232px" data-d="0.40"><img src="images/tr-03.jpg" alt=""></figure>
-          <figure class="fl" style="--x:63%;  --y:7%; --w:126px" data-d="0.75"><img src="images/tr-09.jpg" alt=""></figure>
-          <figure class="fl" style="--x:85%;  --y:1%; --w:208px" data-d="1.00"><img src="images/fl-05.jpg" alt=""></figure>
-          <figure class="fl" style="--x:-2%;  --y:45%; --w:116px" data-d="0.50"><img src="images/fl-07.jpg" alt=""></figure>
-          <figure class="fl" style="--x:94%;  --y:37%; --w:172px" data-d="0.70"><img src="images/tr-13.jpg" alt=""></figure>
-          <figure class="fl" style="--x:13%;  --y:71%; --w:248px" data-d="0.35"><img src="images/tr-19.jpg" alt=""></figure>
-          <figure class="fl" style="--x:44%;  --y:81%; --w:134px" data-d="0.85"><img src="images/fl-10.jpg" alt=""></figure>
-          <figure class="fl" style="--x:73%;  --y:64%; --w:188px" data-d="0.60"><img src="images/tr-11.jpg" alt=""></figure>
+          <figure class="fl" style="--x:-4%;  --y:13%; --w:196px" data-d="0.55"><img data-src="images/tr-01.jpg" alt=""></figure>
+          <figure class="fl" style="--x:21%;   --y:3%; --w:142px" data-d="0.90"><img data-src="images/fl-02.jpg" alt=""></figure>
+          <figure class="fl" style="--x:40%;  --y:-8%; --w:232px" data-d="0.40"><img data-src="images/tr-03.jpg" alt=""></figure>
+          <figure class="fl" style="--x:63%;  --y:7%; --w:126px" data-d="0.75"><img data-src="images/tr-09.jpg" alt=""></figure>
+          <figure class="fl" style="--x:85%;  --y:1%; --w:208px" data-d="1.00"><img data-src="images/fl-05.jpg" alt=""></figure>
+          <figure class="fl" style="--x:-2%;  --y:45%; --w:116px" data-d="0.50"><img data-src="images/fl-07.jpg" alt=""></figure>
+          <figure class="fl" style="--x:94%;  --y:37%; --w:172px" data-d="0.70"><img data-src="images/tr-13.jpg" alt=""></figure>
+          <figure class="fl" style="--x:13%;  --y:71%; --w:248px" data-d="0.35"><img data-src="images/tr-19.jpg" alt=""></figure>
+          <figure class="fl" style="--x:44%;  --y:81%; --w:134px" data-d="0.85"><img data-src="images/fl-10.jpg" alt=""></figure>
+          <figure class="fl" style="--x:73%;  --y:64%; --w:188px" data-d="0.60"><img data-src="images/tr-11.jpg" alt=""></figure>
         </div>
 
         <div class="hero-copy">
@@ -54,7 +53,7 @@
             <span class="hero-line1" id="heroLine1">Des photographies honnêtes,</span>
             <span class="hero-line2" id="heroLine2">
               <span class="hl">pour des gens</span>
-              <span class="grow" id="grow1"><img src="images/hero.jpg" alt="Silhouette dans un champ de fleurs au crépuscule"></span>
+              <span class="grow" id="grow1"><img data-src="images/hero.jpg" alt="Silhouette dans un champ de fleurs au crépuscule"></span>
               <span class="hl">vrais.</span>
             </span>
           </h1>
@@ -107,7 +106,7 @@
         <div class="night-line" id="nightLine">
           <span class="hl nw" id="nw1">Un</span>
           <span class="hl nw" id="nw2">projet,</span>
-          <span class="grow" id="grow2"><img src="images/bg-domaine.jpg" alt="Un café pendant un brief"></span>
+          <span class="grow" id="grow2"><img data-src="images/bg-domaine.jpg" alt="Un café pendant un brief"></span>
           <span class="hl nw" id="nw3">3 étapes.</span>
         </div>
 
@@ -159,26 +158,26 @@
 
         <!-- réserve d'images pour la traînée sous la souris -->
         <div class="trail" id="trail" aria-hidden="true">
-          <img src="images/tr-01.jpg"   style="--tw:150px" alt="">
-          <img src="images/tr-02.jpg"   style="--tw:190px" alt="">
-          <img src="images/tr-03.jpg"  style="--tw:120px" alt="">
-          <img src="images/tr-04.jpg"  style="--tw:200px" alt="">
-          <img src="images/tr-05.jpg" style="--tw:96px"  alt="">
-          <img src="images/tr-06.jpg"  style="--tw:170px" alt="">
-          <img src="images/tr-07.jpg"  style="--tw:34px"  alt="">
-          <img src="images/tr-08.jpg"  style="--tw:140px" alt="">
-          <img src="images/tr-09.jpg"  style="--tw:200px" alt="">
-          <img src="images/tr-10.jpg" style="--tw:110px" alt="">
-          <img src="images/tr-11.jpg"  style="--tw:28px"  alt="">
-          <img src="images/tr-12.jpg"  style="--tw:160px" alt="">
-          <img src="images/tr-13.jpg"  style="--tw:130px" alt="">
-          <img src="images/tr-14.jpg"  style="--tw:180px" alt="">
-          <img src="images/tr-15.jpg"  style="--tw:40px"  alt="">
-          <img src="images/tr-16.jpg"  style="--tw:150px" alt="">
-          <img src="images/tr-17.jpg"  style="--tw:120px" alt="">
-          <img src="images/tr-18.jpg"  style="--tw:200px" alt="">
-          <img src="images/tr-19.jpg" style="--tw:100px" alt="">
-          <img src="images/tr-20.jpg"  style="--tw:170px" alt="">
+          <img data-src="images/tr-01.jpg"   style="--tw:150px" alt="">
+          <img data-src="images/tr-02.jpg"   style="--tw:190px" alt="">
+          <img data-src="images/tr-03.jpg"  style="--tw:120px" alt="">
+          <img data-src="images/tr-04.jpg"  style="--tw:200px" alt="">
+          <img data-src="images/tr-05.jpg" style="--tw:96px"  alt="">
+          <img data-src="images/tr-06.jpg"  style="--tw:170px" alt="">
+          <img data-src="images/tr-07.jpg"  style="--tw:34px"  alt="">
+          <img data-src="images/tr-08.jpg"  style="--tw:140px" alt="">
+          <img data-src="images/tr-09.jpg"  style="--tw:200px" alt="">
+          <img data-src="images/tr-10.jpg" style="--tw:110px" alt="">
+          <img data-src="images/tr-11.jpg"  style="--tw:28px"  alt="">
+          <img data-src="images/tr-12.jpg"  style="--tw:160px" alt="">
+          <img data-src="images/tr-13.jpg"  style="--tw:130px" alt="">
+          <img data-src="images/tr-14.jpg"  style="--tw:180px" alt="">
+          <img data-src="images/tr-15.jpg"  style="--tw:40px"  alt="">
+          <img data-src="images/tr-16.jpg"  style="--tw:150px" alt="">
+          <img data-src="images/tr-17.jpg"  style="--tw:120px" alt="">
+          <img data-src="images/tr-18.jpg"  style="--tw:200px" alt="">
+          <img data-src="images/tr-19.jpg" style="--tw:100px" alt="">
+          <img data-src="images/tr-20.jpg"  style="--tw:170px" alt="">
         </div>
       </div>
     </section>

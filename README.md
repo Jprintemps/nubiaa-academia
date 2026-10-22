@@ -28,6 +28,23 @@
 - Trois images Codex de nuit ou de coucher de soleil ont une version de jour pour le thème clair : `14-dunes-jour`, `15-puce-sable-jour` et `16-dunes-traces-jour`. `python sources/build_images.py` refait les deux séries.
 - `?theme=clair` ou `?theme=sombre` dans l'adresse force un thème, pour les captures. `python sources/captures.py <dossier> clair` capture le questionnaire en thème clair (même chose pour `captures_presentation.py`).
 
+**Léger, même en 2G**, sans changer le design :
+- **Deux tirages par image.** Sur téléphone et sur connexion lente (2G, 3G lente, économie de données), `theme.js` sert le tirage léger (`images/m/`, `images/clair/m/` : 60 % de la taille). Une seule version de chaque image est téléchargée : les images du HTML s'écrivent `data-src`, et les scripts passent leurs chemins par `NubiaaImg()`.
+- **Le poids au chargement, sur téléphone** : 327 Ko pour le questionnaire (538 Ko avant) et 516 Ko pour la page programme (1,35 Mo avant), polices comprises. GitHub compresse en plus le JS et le CSS.
+- **Les polices** sont servies par le site (`fonts/`), sans connexion à Google : sur un réseau 2G, chaque nouveau serveur coûte plusieurs secondes.
+- **Le logo et le monogramme** sont en PNG à palette : 9 Ko et 1,5 Ko (42 Ko et 15 Ko avant). Les originaux sont dans `sources/marque/`.
+- **La musique** n'est téléchargée que si la personne la choisit. Sur connexion lente, c'est une version mono à 32 kb/s (700 Ko au lieu de 2,3 Mo).
+- **Les images de la devise** ne se chargent qu'à l'approche de leur bande ; les fonds du questionnaire, au fil des questions.
+- `?leger=1` force le tirage léger (et `?leger=0` le tirage complet), pour les tests.
+
+**Accessibilité** :
+- un lien « Aller au questionnaire », visible seulement au clavier ;
+- chaque question est une section nommée par son titre ;
+- les messages d'erreur sont reliés à leur champ et annoncés, et les champs en erreur sont marqués `aria-invalid` ;
+- les flèches parcourent les réponses, les jours, les heures et le calendrier (haut et bas sautent d'une semaine) ;
+- les chiffres 1 à 9 ne répondent plus pendant qu'on écrit ou qu'on choisit un pays ;
+- la question du son est une vraie fenêtre de dialogue (`role="dialog"`), et le mouvement réduit est respecté partout.
+
 **Le son** (`sound.js`) : une musique de fond, et un effet sonore par mouvement.
 
 **La musique** est l'instru « Cutthroat » de Syndrome (`audio/musique-fond.mp3`, 2 min 39, réencodée en 112 kb/s avec le volume égalisé). Elle tourne en boucle sous les effets :

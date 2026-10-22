@@ -52,6 +52,10 @@ img { display: block; }
 :focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; border-radius: 12px; }
 .noscript { padding: 120px var(--gutter); }
 
+/* lien d'évitement : hors de l'écran, il n'apparaît qu'au focus clavier */
+.skip { position: fixed; z-index: 100; left: 12px; top: 12px; padding: 10px 16px; border-radius: 12px; background: var(--bronze); color: var(--on-bronze); font-weight: 500; text-decoration: none; transform: translateY(-160%); transition: transform .2s; }
+.skip:focus { transform: none; }
+
 /* ═══ BARRE ═══ */
 .bar {
   position: fixed; z-index: 50;

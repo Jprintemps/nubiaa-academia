@@ -96,7 +96,9 @@
      de sortie), sous un léger filtre passe-bas pour qu'elle reste
      derrière. Elle tourne en boucle, entre en fondu sur 3 s et
      s'arrête en fondu ; elle se met en pause quand l'onglet est caché. */
-  const MUSIC_SRC = 'audio/musique-fond.mp3', MUSIC_LEVEL = 0.32;
+  // sur connexion lente (2G, économie de données) : la même musique en mono, 32 kb/s (≈ 640 Ko au lieu de 2,3 Mo)
+  const slowNet = !!(window.NubiaaTheme && window.NubiaaTheme.slow);
+  const MUSIC_SRC = slowNet ? 'audio/musique-fond-leger.mp3' : 'audio/musique-fond.mp3', MUSIC_LEVEL = 0.32;
   let music = null, musicBus = null, track = null, pauseTimer = 0;
 
   function musicChain() {

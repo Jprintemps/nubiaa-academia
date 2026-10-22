@@ -70,6 +70,7 @@ const DOMAINES = [
   { v: 'Je ne sais pas encore', short: '', icon: 'compass', sub: 'On en parle pendant l’échange' }
 ];
 
+const img = (p) => (window.NubiaaImg ? window.NubiaaImg(p) : p);   // le tirage d'image du thème et de l'écran (theme.js)
 const QUESTIONS = [
   {
     id: 'domaine', type: 'choice', other: 'Quel domaine ?', kicker: 'Domaine',
@@ -136,6 +137,7 @@ const QUESTIONS = [
     bg: 'images/bg-creneau.jpg', floats: ['images/fl-06.jpg', 'images/tr-07.jpg']
   }
 ];
+if (window.NubiaaTheme) window.NubiaaTheme.fixData(QUESTIONS);
 const N = QUESTIONS.length;
 
 /* ─── Outils ─── */
@@ -237,10 +239,11 @@ function slotOf(iso, time) {
   return { y, m, d: dd, hh, mm, label: `${long[0].toUpperCase() + long.slice(1)} à ${hh} h${mm ? ' ' + String(mm).padStart(2, '0') : ''}` };
 }
 /* ═══ CONSTRUCTION DES SCÈNES ═══ */
+let errId = 0;
 function otherForm(label, cta) {
   return `<form class="other" data-other-form hidden novalidate>
-        <label class="field"><input name="autre" maxlength="160" autocomplete="off" placeholder=" "><span class="lbl">${typo(label)}</span></label>
-        <p class="err" data-err="autre"></p>
+        <label class="field"><input name="autre" maxlength="160" autocomplete="off" placeholder=" " aria-describedby="err-autre-${++errId}"><span class="lbl">${typo(label)}</span></label>
+        <p class="err" data-err="autre" id="err-autre-${errId}" aria-live="polite"></p>
         <button class="btn primary" type="submit">${typo(cta)} ${icon('arrow-right')}</button>
       </form>`;
 }
@@ -299,12 +302,12 @@ function sceneHTML(q, i) {
   } else if (q.type === 'contact') {
     body = `
       <form class="fields" novalidate>
-        <label class="field"><input name="nom" autocomplete="name" placeholder=" " required><span class="lbl">Nom et prénom</span></label>
-        <p class="err" data-err="nom"></p>
-        <div class="field has-prefix"><span class="prefix"><span class="prefix-val" aria-hidden="true">${flag('CD')} +243</span>${icon('caret-down')}<select name="indicatif" aria-label="Pays de votre numéro">${countryOptions()}</select></span><input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel-national" placeholder=" " required aria-label="Numéro WhatsApp"><span class="lbl">Numéro WhatsApp</span></div>
-        <p class="err" data-err="whatsapp"></p>
-        <label class="field"><input name="email" type="email" inputmode="email" autocomplete="email" placeholder=" "><span class="lbl">E-mail (facultatif)</span></label>
-        <p class="err" data-err="email"></p>
+        <label class="field"><input name="nom" autocomplete="name" placeholder=" " required aria-describedby="err-nom"><span class="lbl">Nom et prénom</span></label>
+        <p class="err" data-err="nom" id="err-nom" aria-live="polite"></p>
+        <div class="field has-prefix"><span class="prefix"><span class="prefix-val" aria-hidden="true">${flag('CD')} +243</span>${icon('caret-down')}<select name="indicatif" aria-label="Pays de votre numéro">${countryOptions()}</select></span><input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel-national" placeholder=" " required aria-label="Numéro WhatsApp" aria-describedby="err-whatsapp"><span class="lbl">Numéro WhatsApp</span></div>
+        <p class="err" data-err="whatsapp" id="err-whatsapp" aria-live="polite"></p>
+        <label class="field"><input name="email" type="email" inputmode="email" autocomplete="email" placeholder=" " aria-describedby="err-email"><span class="lbl">E-mail (facultatif)</span></label>
+        <p class="err" data-err="email" id="err-email" aria-live="polite"></p>
         <div class="minor" data-minor hidden>${icon('user')}<span>${typo('Si vous avez moins de 18 ans, un parent devra donner son accord avant tout paiement.')}</span></div>
         <div class="actions"><button class="btn primary" type="submit">Choisir mon créneau ${icon('arrow-right')}</button></div>
         <p class="legal">${typo('En continuant, vous acceptez que NUBIAA vous écrive sur WhatsApp au sujet de votre demande. Vos réponses ne sont ni vendues ni partagées.')}</p>
@@ -331,7 +334,7 @@ function sceneHTML(q, i) {
       <div class="floats" aria-hidden="true">${q.floats.map((f) => `<figure><img src="${f}" alt="" loading="lazy"></figure>`).join('')}</div>
       <div class="panel">
         <p class="kicker">${typo(q.kicker)} <b>${n} / ${String(N).padStart(2, '0')}</b></p>
-        <h2 class="title" data-title>${words(title)}</h2>
+        <h2 class="title" data-title id="t-${q.id}">${words(title)}</h2>
         ${note ? `<p class="note">${typo(note)}</p>` : ''}
         ${body}
       </div>
@@ -342,6 +345,7 @@ QUESTIONS.forEach((q, i) => {
   const el = document.createElement('section');
   el.className = 'scene q' + (i === N - 1 ? ' last' : '');
   el.id = 'q-' + q.id;
+  el.setAttribute('aria-labelledby', 't-' + q.id);
   el.dataset.i = i;
   el.innerHTML = sceneHTML(q, i);
   if (i > 0) el.hidden = true;
@@ -363,7 +367,7 @@ const done = document.createElement('section');
 done.className = 'scene done';
 done.id = 'fin';
 done.hidden = true;
-done.innerHTML = `<div class="pin"><div class="bg"><img src="images/hero.jpg" alt="" loading="lazy"></div><div class="veil"></div><div class="panel" id="donePanel"></div></div>`;
+done.innerHTML = `<div class="pin"><div class="bg"><img src="${img('images/hero.jpg')}" alt="" loading="lazy"></div><div class="veil"></div><div class="panel" id="donePanel"></div></div>`;
 flow.appendChild(done);
 
 // le dernier écran : le logo en grand
@@ -371,7 +375,7 @@ const outro = document.createElement('section');
 outro.className = 'scene outro';
 outro.id = 'logo';
 outro.hidden = true;
-outro.innerHTML = `<div class="pin"><div class="outro-in"><img src="images/logo.png" alt="NUBIAA Academia" width="1120" height="348"><p class="mono">Ça vous plaît ? Fabriquez-le.</p></div></div>`;
+outro.innerHTML = `<div class="pin"><div class="outro-in"><img src="${img('images/logo.png')}" alt="NUBIAA Academia" width="1120" height="348" loading="lazy"><p class="mono">Ça vous plaît ? Fabriquez-le.</p></div></div>`;
 flow.appendChild(outro);
 
 /* ─── Jours ouvrés à venir (le dimanche est sauté) ─── */
@@ -493,6 +497,31 @@ function showOther(sceneEl, on) {
   if (on) requestAnimationFrame(() => f.autre.focus({ preventScroll: true }));
 }
 
+/* ─── Clavier : les flèches parcourent un groupe de choix ───
+   Comme dans un groupe de boutons radio natif ; dans le calendrier,
+   haut et bas sautent d'une semaine. */
+flow.addEventListener('keydown', (e) => {
+  const group = e.target.closest('[role="radiogroup"]');
+  if (!group || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
+  const items = $$('[role="radio"]:not([disabled])', group);
+  const all = $$('[role="radio"]', group);
+  const cur = all.indexOf(e.target);
+  if (cur < 0 || !items.length) return;
+  e.preventDefault();
+  const grid = group.classList.contains('cal-grid');
+  let next;
+  if (e.key === 'Home') next = items[0];
+  else if (e.key === 'End') next = items[items.length - 1];
+  else {
+    const step = (e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1) * (grid && (e.key === 'ArrowUp' || e.key === 'ArrowDown') ? 7 : 1);
+    for (let k = cur + step; k >= 0 && k < all.length; k += Math.sign(step)) {
+      if (!all[k].disabled) { next = all[k]; break; }
+      if (Math.abs(step) === 7) break;
+    }
+  }
+  if (next) next.focus({ preventScroll: true });
+});
+
 /* ─── Le calendrier (« Aucun de ces créneaux ne me convient ») ─── */
 const cal = { view: null, iso: '', time: '' };
 function showPicker(sceneEl, on) {
@@ -560,6 +589,7 @@ flow.addEventListener('submit', (e) => {
   const sceneEl = f.closest('.scene.q'), i = +sceneEl.dataset.i, q = QUESTIONS[i];
   $('[data-err="autre"]', f).textContent = v.length < 2 ? 'Écrivez quelques mots.' : '';
   f.autre.closest('.field').classList.toggle('invalid', v.length < 2);
+  f.autre.setAttribute('aria-invalid', String(v.length < 2));
   if (v.length < 2) { sfx('error'); f.autre.focus({ preventScroll: true }); return; }
   sfx('select');
   answers[q.id] = `Autre : ${v}`;
@@ -584,6 +614,7 @@ flow.addEventListener('submit', (e) => {
   Object.entries(errs).forEach(([k, v]) => {
     $(`[data-err="${k}"]`, f).textContent = v;
     f[k].closest('.field').classList.toggle('invalid', !!v);
+    f[k].setAttribute('aria-invalid', String(!!v));
   });
   const bad = Object.keys(errs).find((k) => errs[k]);
   if (bad) { sfx('error'); f[bad].focus({ preventScroll: true }); return; }
@@ -605,6 +636,7 @@ flow.addEventListener('input', (e) => {
   const field = e.target.closest('.field');
   if (field && field.classList.contains('invalid')) {
     field.classList.remove('invalid');
+    e.target.removeAttribute('aria-invalid');
     const err = $(`[data-err="${e.target.name}"]`, field.closest('form'));
     if (err) err.textContent = '';
   }
@@ -684,7 +716,7 @@ $('[data-top]').addEventListener('click', (e) => { e.preventDefault(); glideTo(0
 
 /* ─── Clavier : 1 à 9 répond à la question à l'écran ─── */
 addEventListener('keydown', (e) => {
-  if (e.target.closest('input') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.closest('input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
   const k = parseInt(e.key, 10);
   if (!k) return;
   const s = scenes.find((x) => !x.el.hidden && inView(x.el));

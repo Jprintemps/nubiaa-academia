@@ -54,3 +54,7 @@ Générées mais pas utilisées (gardées dans `gen/`) : `01-hero` (pyramides) e
 ## Musique
 
 « Cutthroat », instru de **Syndrome** (Old School Dark Rap Beat, diffusée gratuitement par le producteur), utilisée en fond sur les deux pages : `audio/musique-fond.mp3`. Prod. By Syndrome.
+
+## Polices
+
+**Bricolage Grotesque** (Mathieu Triay) et **DM Mono** (Colophon Foundry), sous licence SIL Open Font License 1.1, copiées de Google Fonts dans `fonts/` (sous-ensembles latin et latin étendu ; Bricolage limitée aux graisses 300 à 600).
