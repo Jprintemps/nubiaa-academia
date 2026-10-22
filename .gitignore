@@ -1,0 +1,6 @@
+# Sources de travail (photos brutes, images générées, scripts) : restent en local
+sources/
+# Anciennes illustrations et images qui ne servent plus sur le site
+illustrations/
+images/inscription-bg.jpg
+images/process.jpg

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NUBIAA Academia · Questionnaire d’inscription</title>
+  <meta name="description" content="Sept questions, deux minutes : préparez votre premier échange avec Stella et réservez votre place dans la cohorte pilote de NUBIAA Academia.">
+  <meta name="theme-color" content="#141311">
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="images/hero.jpg">
+  <link rel="stylesheet" href="questionnaire.css">
+</head>
+<body>
+
+  <!-- Barre translucide : marque, avancement -->
+  <header class="bar" id="bar">
+    <a class="brand" href="#ouverture" data-top aria-label="NUBIAA Academia, revenir au début">
+      <img src="images/mark-creme.png" alt="" width="22" height="22">
+      <span>NUBIAA Academia</span>
+    </a>
+    <p class="count mono" id="count" aria-live="polite"></p>
+    <div class="bar-right"><a class="bar-link mono" href="presentation.html">Le programme</a></div>
+    <div class="progress" role="progressbar" aria-label="Questions répondues" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><i id="progressFill"></i></div>
+  </header>
+
+  <main id="flow">
+
+    <!-- ─── OUVERTURE : l'image naît entre les mots puis prend tout l'écran ─── -->
+    <section class="scene hero" id="ouverture">
+      <div class="pin">
+        <div class="sky"></div>
+        <div class="sun" id="sun"></div>
+        <svg class="dune far" id="duneFar" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+        <svg class="dune mid" id="duneMid" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+        <svg class="dune near" id="duneNear" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+
+        <div class="cloud" id="cloud" aria-hidden="true">
+          <figure style="--x:8%;  --y:16%; --w:150px" data-d="0.9"><img src="images/tr-01.jpg" alt=""></figure>
+          <figure style="--x:26%; --y:6%;  --w:110px" data-d="1.3"><img src="images/tr-03.jpg" alt=""></figure>
+          <figure style="--x:72%; --y:9%;  --w:170px" data-d="0.7"><img src="images/tr-09.jpg" alt=""></figure>
+          <figure style="--x:90%; --y:30%; --w:120px" data-d="1.1"><img src="images/fl-05.jpg" alt=""></figure>
+          <figure style="--x:4%;  --y:58%; --w:126px" data-d="1.2"><img src="images/fl-07.jpg" alt=""></figure>
+          <figure style="--x:20%; --y:78%; --w:176px" data-d="0.8"><img src="images/tr-13.jpg" alt=""></figure>
+          <figure style="--x:76%; --y:74%; --w:150px" data-d="1.0"><img src="images/tr-19.jpg" alt=""></figure>
+          <figure style="--x:93%; --y:64%; --w:104px" data-d="1.4"><img src="images/tr-11.jpg" alt=""></figure>
+        </div>
+
+        <!-- l'image plein écran, découpée au départ à la taille du trou entre les mots -->
+        <div class="full" id="full" aria-hidden="true">
+          <img src="images/hero.jpg" alt="">
+          <div class="full-veil"></div>
+        </div>
+
+        <div class="hero-copy" id="heroCopy">
+          <p class="kicker mono" id="heroKicker">NUBIAA Academia · Inscriptions · Cohorte pilote 2027</p>
+          <h1 class="hero-title">
+            <span class="l1" id="heroL1">Votre premier prototype</span>
+            <span class="l2"><span class="w" id="heroA">commence</span><span class="hole" id="hole"></span><span class="w" id="heroB">ici.</span></span>
+          </h1>
+        </div>
+
+        <div class="intro" id="intro">
+          <p class="kicker mono">Le questionnaire</p>
+          <h2 class="intro-title" id="introTitle">Sept questions, deux minutes.</h2>
+          <p class="intro-text" id="introText">Stella lit chaque réponse, puis vous appelle 20 minutes pour préparer votre entrée dans la cohorte. L’échange est gratuit.</p>
+          <button class="btn primary" type="button" id="startBtn">Commencer</button>
+        </div>
+
+        <p class="cue mono" id="cue"><span>Faites défiler</span><i></i></p>
+      </div>
+    </section>
+
+    <!-- les scènes du questionnaire sont construites par questionnaire.js -->
+
+  </main>
+
+  <noscript><p class="noscript">Ce questionnaire a besoin de JavaScript. Vous pouvez aussi écrire à Stella sur Instagram : @nubiaa.minds.</p></noscript>
+
+  <script src="sound.js"></script>
+  <script src="questionnaire.js"></script>
+</body>
+</html>
