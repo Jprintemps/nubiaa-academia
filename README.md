@@ -22,11 +22,12 @@
 
 **Le son** (`sound.js`) : une musique de fond très douce, et un effet sonore par mouvement.
 
-**La musique** donne de l'élan sans prendre la place :
-- **l'harmonie** : ré majeur, sur la grille ré – la – si mineur – sol, à 76 battements par minute ;
-- **les instruments** : une nappe feutrée, un arpège de piano léger et une basse discrète ;
-- **la variation** : une petite mélodie revient un tour sur deux ;
-- **le volume** : nettement plus bas que les effets, avec un fondu de 3 secondes à l'allumage.
+**La musique** est une instru trap douce, qui reste sous les effets :
+- **le rythme** : 140 battements par minute en demi-temps, donc ressenti à 70 ; kick, clap sur le 3e temps, charleston en croches avec des roulements en fin de mesure ;
+- **la basse** : une 808 qui glisse d'un accord à l'autre, légèrement saturée pour s'entendre sur un téléphone ;
+- **l'harmonie** : une nappe sombre en ré mineur (ré m – si♭ – sol m – la ; le la majeur garde la couleur orientale du site) ;
+- **la mélodie** : une cloche qui entre au deuxième tour ;
+- **le volume** : un fondu de 3 secondes à l'allumage.
 
 **Les effets** : Chaque son part au moment exact où son mouvement démarre, au scroll, dans les deux sens. Tout est synthétisé, sans aucun fichier audio.
 

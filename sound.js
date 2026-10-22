@@ -2,11 +2,10 @@
    NUBIAA Academia — les effets sonores
    Chaque mouvement de la page a son propre son, déclenché au
    moment exact où il se produit (au scroll, dans les deux sens).
-   Sous les effets, une musique de fond très douce, qui donne de
-   l'élan : ré majeur, ré – la – si mineur – sol, une nappe, un
-   arpège de piano léger et une basse discrète, à 76 battements
-   par minute. Tout est synthétisé avec la Web Audio API : aucun
-   fichier, aucun droit à gérer.
+   Sous les effets, une instru trap douce : 808, clap, charleston
+   avec roulements, nappe et cloche, en ré mineur à 140 battements
+   par minute (demi-temps). Tout est synthétisé avec la Web Audio
+   API : aucun fichier, aucun droit à gérer.
 
    Au chargement, une première question : avec ou sans le son ?
    Ce clic débloque l'audio (les navigateurs l'exigent), puis la
@@ -91,73 +90,107 @@
   }
   const pluck = (f, peak, dur, dest) => { tone('triangle', f * 1.006, f, dur, peak, dest, 0.004); tone('sine', f * 2, f * 2, dur * 0.5, peak * 0.25, dest, 0.004); };
 
-  /* ─── la musique de fond ───
-     Un ordonnanceur pose les notes un peu en avance sur l'horloge
-     audio (et non sur des minuteries) : le tempo reste régulier même
-     quand la page travaille. */
-  const BPM = 76, BEAT = 60 / BPM, BAR = BEAT * 4;
+  /* ─── la musique de fond : une instru trap douce ───
+     140 battements par minute en demi-temps (on la ressent à 70) :
+     kick et basse 808 qui glisse, clap sur le 3e temps, charleston en
+     croches avec des roulements, une nappe sombre et une mélodie de
+     cloche. Ré mineur, ré m – si♭ – sol m – la : le la majeur garde la
+     couleur orientale du site. Un ordonnanceur pose les notes un peu
+     en avance sur l'horloge audio : le tempo reste régulier même quand
+     la page travaille. */
+  const BPM = 140, STEP = 60 / BPM / 4, BAR = STEP * 16;
   const N = (semi) => 146.83 * Math.pow(2, semi / 12);          // demi-tons depuis ré 3
-  // ré, la, si mineur, sol : fondamentale + accord (demi-tons depuis ré 3)
+  // deux mesures par accord : fondamentale + accord (demi-tons depuis ré 3)
   const CHORDS = [
-    { root: 0, tones: [0, 4, 7, 12] },      // ré majeur
-    { root: 7, tones: [7, 11, 14, 19] },    // la majeur
-    { root: 9, tones: [9, 12, 16, 21] },    // si mineur
-    { root: 5, tones: [5, 9, 12, 17] }      // sol majeur
+    { root: 0, tones: [0, 3, 7, 12] },      // ré mineur
+    { root: -4, tones: [-4, 0, 3, 8] },     // si bémol majeur
+    { root: -7, tones: [-7, -2, 3, 5] },    // sol mineur
+    { root: -5, tones: [-5, -1, 2, 7] }     // la majeur
   ];
-  // une mélodie simple, un tour sur deux (demi-tons depuis ré 4, null = silence)
-  const MELODY = [[16, 14, null, 12], [14, null, 11, null], [12, 14, 16, null], [14, 12, null, null]];
-  let music = null, musicBus = null, barIndex = 0, nextBarTime = 0, schedTimer = 0;
+  // la mélodie de cloche (pas de double croche → demi-tons depuis ré 4), un motif par accord
+  const BELL = [
+    [[0, 7], [3, 5], [6, 3], [10, 2], [12, 0]],
+    [[0, 5], [4, 3], [8, 0], [12, -2]],
+    [[0, 3], [3, 2], [6, 0], [10, -2], [12, 0]],
+    [[0, 1], [4, 0], [8, -1], [11, 1], [14, 4]]
+  ];
+  let music = null, musicBus = null, barIndex = 0, nextBarTime = 0, schedTimer = 0, crush = null;
 
   function musicChain() {
     musicBus = ctx.createGain(); musicBus.gain.value = 0;
-    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400; lp.Q.value = 0.4;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9000; lp.Q.value = 0.3;
     musicBus.connect(lp); lp.connect(out);
-    const send = ctx.createGain(); send.gain.value = 0.45; lp.connect(send).connect(verb);
+    const send = ctx.createGain(); send.gain.value = 0.25; lp.connect(send).connect(verb);
+    // une saturation douce pour que la 808 s'entende aussi sur un haut-parleur de téléphone
+    crush = ctx.createWaveShaper();
+    const c = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; c[i] = Math.tanh(x * 2.2); }
+    crush.curve = c;
+    crush.connect(musicBus);
   }
-  function padChord(tones, t) {
-    tones.forEach((st, i) => {
-      [0, 0.06].forEach((det) => {                       // deux voix légèrement désaccordées : la nappe respire
-        const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
-        o.type = 'sawtooth'; o.frequency.value = N(st) * (1 + det / 100) * (i === 0 ? 1 : 1);
-        f.type = 'lowpass'; f.frequency.value = 700; f.Q.value = 0.3;
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.linearRampToValueAtTime(0.012, t + 1.1);
-        g.gain.setValueAtTime(0.012, t + BAR - 0.6);
-        g.gain.linearRampToValueAtTime(0.0001, t + BAR + 0.5);
-        o.connect(f).connect(g).connect(musicBus);
-        o.start(t); o.stop(t + BAR + 0.6);
-      });
+  const at = (t) => Math.max(0, t - ctx.currentTime);
+
+  function kick(t) { tone('sine', 150, 44, 0.32, 0.22, musicBus, 0.002, at(t)); }
+  function b808(semi, t, len, glideTo) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    const f = N(semi - 24);                                    // ré 1 → la 1
+    o.frequency.setValueAtTime(f * 1.06, t);
+    o.frequency.exponentialRampToValueAtTime(f, t + 0.06);
+    if (glideTo !== undefined) o.frequency.exponentialRampToValueAtTime(N(glideTo - 24), t + len * 0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.16, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o.connect(g).connect(crush);
+    o.start(t); o.stop(t + len + 0.05);
+  }
+  function clap(t) {
+    [0, 0.011, 0.022].forEach((d) => noise(0.05, { f0: 1500, f1: 1200, q: 1.2, peak: 0.07, attack: 0.001, dest: musicBus, at: at(t) + d }));
+    noise(0.22, { f0: 1800, f1: 900, q: 0.9, peak: 0.035, attack: 0.002, dest: musicBus, at: at(t) + 0.03 });
+    tone('triangle', 210, 160, 0.09, 0.05, musicBus, 0.001, at(t));
+  }
+  function hat(t, peak = 0.03, open = false) {
+    noise(open ? 0.16 : 0.03, { type: 'highpass', f0: 8500, f1: 9500, q: 0.6, peak, attack: 0.001, dest: musicBus, at: at(t) });
+  }
+  function bell(semi, t) {
+    const f = N(semi + 12);
+    tone('sine', f, f, 1.1, 0.03, musicBus, 0.003, at(t));
+    tone('sine', f * 2.76, f * 2.76, 0.35, 0.008, musicBus, 0.002, at(t));   // le partiel qui fait « cloche »
+  }
+  function pad(tones, t) {
+    tones.forEach((st) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = 'sawtooth'; o.frequency.value = N(st);
+      f.type = 'lowpass'; f.frequency.value = 520; f.Q.value = 0.2;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.008, t + 0.9);
+      g.gain.setValueAtTime(0.008, t + BAR * 2 - 0.5);
+      g.gain.linearRampToValueAtTime(0.0001, t + BAR * 2 + 0.4);
+      o.connect(f).connect(g).connect(musicBus);
+      o.start(t); o.stop(t + BAR * 2 + 0.5);
     });
   }
-  function piano(freq, t, peak, dur) {
-    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain();
-    o.type = 'triangle'; o.frequency.value = freq;
-    o2.type = 'sine'; o2.frequency.value = freq * 2; g2.gain.value = 0.3;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(peak, t + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); o2.connect(g2).connect(g); g.connect(musicBus);
-    o.start(t); o2.start(t); o.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
-  }
-  function bass(freq, t) {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.07, t + 0.03);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + BEAT * 1.8);
-    o.connect(g).connect(musicBus);
-    o.start(t); o.stop(t + BEAT * 2);
-  }
+
   function scheduleBar(t, n) {
-    const c = CHORDS[n % 4], lap = Math.floor(n / 4);
-    padChord(c.tones, t);
-    bass(N(c.root - 12), t); bass(N(c.root - 12), t + BEAT * 2);
-    // arpège en croches : 1 – 3 – 5 – 8, montant puis descendant
-    const arp = [0, 1, 2, 3, 2, 1, 2, 3];
-    arp.forEach((k, i) => piano(N(c.tones[k] + 12), t + i * BEAT / 2, i % 4 === 0 ? 0.03 : 0.02, 1.1));
-    // la mélodie, un tour sur deux
-    if (lap % 2 === 1) MELODY[n % 4].forEach((st, i) => { if (st !== null) piano(N(st + 12), t + i * BEAT, 0.035, 1.8); });
+    const ci = Math.floor(n / 2) % 4, c = CHORDS[ci], second = n % 2 === 1, lap = Math.floor(n / 8);
+    if (!second) pad(c.tones, t);
+    // kick + 808 : le 1, la double croche 10, et un rebond sur la 7 une mesure sur deux
+    const hits = second ? [0, 7, 10] : [0, 10];
+    hits.forEach((s, i) => {
+      kick(t + s * STEP);
+      const last = i === hits.length - 1;
+      const next = CHORDS[(ci + (second ? 1 : 0)) % 4].root;
+      b808(c.root, t + s * STEP, (last ? 16 - s : hits[i + 1] - s) * STEP, last && second ? next : undefined);
+    });
+    clap(t + 8 * STEP);                                       // le 3e temps : le demi-temps de la trap
+    // charleston en croches ; roulement en triples croches à la fin des mesures paires
+    for (let s = 0; s < 16; s += 2) hat(t + s * STEP, s % 4 === 0 ? 0.03 : 0.02);
+    hat(t + 6 * STEP, 0.022, true);
+    if (second) [12, 12.5, 13, 13.5, 14, 14.33, 14.66, 15, 15.33, 15.66].forEach((s, i) => hat(t + s * STEP, 0.012 + i * 0.0018));
+    // la cloche entre au deuxième tour
+    if (lap >= 1 && !second) BELL[ci].forEach(([s, st]) => bell(st, t + s * STEP));
   }
+
   function startMusic() {
     if (music) return;
     if (!musicBus) musicChain();
@@ -166,12 +199,12 @@
     nextBarTime = ctx.currentTime + 0.15;
     musicBus.gain.cancelScheduledValues(ctx.currentTime);
     musicBus.gain.setValueAtTime(musicBus.gain.value, ctx.currentTime);
-    musicBus.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 3);     // fondu d'entrée
+    musicBus.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 3);      // fondu d'entrée
     const tick = () => {
-      while (nextBarTime < ctx.currentTime + 0.6) { scheduleBar(nextBarTime, barIndex++); nextBarTime += BAR; }
+      while (nextBarTime < ctx.currentTime + 0.5) { scheduleBar(nextBarTime, barIndex++); nextBarTime += BAR; }
     };
     tick();
-    schedTimer = setInterval(tick, 200);
+    schedTimer = setInterval(tick, 150);
   }
   function stopMusic() {
     if (!music) return;
