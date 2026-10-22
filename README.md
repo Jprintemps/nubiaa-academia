@@ -20,16 +20,16 @@
 - **Les étapes.** Une icône par étape.
 - **La fin.** Le grand logo, révélé en rideau.
 
-**Le son** (`sound.js`) : une musique de fond très douce, et un effet sonore par mouvement.
+**Le son** (`sound.js`) : une musique de fond, et un effet sonore par mouvement.
 
-**La musique** est une instru trap douce, qui reste sous les effets :
-- **le rythme** : 140 battements par minute en demi-temps, donc ressenti à 70 ; kick, clap sur le 3e temps, charleston en croches avec des roulements en fin de mesure ;
-- **la basse** : une 808 qui glisse d'un accord à l'autre, légèrement saturée pour s'entendre sur un téléphone ;
-- **l'harmonie** : une nappe sombre en ré mineur (ré m – si♭ – sol m – la ; le la majeur garde la couleur orientale du site) ;
-- **la mélodie** : une cloche qui entre au deuxième tour ;
-- **le volume** : un fondu de 3 secondes à l'allumage.
+**La musique** est l'instru « Cutthroat » de Syndrome (`audio/musique-fond.mp3`, 2 min 39, réencodée en 112 kb/s avec le volume égalisé). Elle tourne en boucle sous les effets :
+- elle passe dans la même chaîne que les effets, à un volume plus bas qu'eux ;
+- elle entre en fondu sur 3 secondes, et s'arrête en fondu (touche M) ;
+- elle se met en pause quand l'onglet est caché, et reprend au retour.
 
-**Les effets** : Chaque son part au moment exact où son mouvement démarre, au scroll, dans les deux sens. Tout est synthétisé, sans aucun fichier audio.
+L'instru est diffusée comme « FREE » beat : en général, c'est gratuit avec crédit, pour un usage non commercial. Avant de lancer des pubs ou de vendre l'accès, vérifier la licence avec le producteur, ou acheter une licence.
+
+**Les effets** : Chaque son part au moment exact où son mouvement démarre, au scroll, dans les deux sens. Ils sont synthétisés, sans fichier audio.
 
 | Mouvement | Son |
 |---|---|

@@ -50,3 +50,7 @@ Les photos libres sont passées en trois tons noir, bronze et crème (`build_ima
 | https://www.pexels.com/photo/19895705/ | `x04` | bento-domaines.jpg |
 
 Générées mais pas utilisées (gardées dans `gen/`) : `01-hero` (pyramides) et `02-temple-pcb` (temple), écartées pour garder « juste le désert ». `07` à `10` et `08b` (bento) ont été remplacées par des photos Pexels libres.
+
+## Musique
+
+« Cutthroat », instru de **Syndrome** (Old School Dark Rap Beat, diffusée gratuitement par le producteur), utilisée en fond sur les deux pages : `audio/musique-fond.mp3`. Prod. By Syndrome.
