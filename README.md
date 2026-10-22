@@ -11,7 +11,8 @@
 - **La page s'arrête à la question en cours.** Répondre ouvre la scène suivante et y emmène la page avec un ressort. La molette ou le doigt reprennent la main à tout moment. On peut remonter changer une réponse : les questions qui en dépendent se réécrivent.
 - **La fin** affiche le rendez-vous, les 4 étapes qui suivent, l'export agenda (.ics) et le lien vers le programme.
 - **Au clavier**, les touches 1 à 9 répondent à la question affichée.
-- **« Autre » à chaque question** ouvre un champ libre, et rien ne part tant que la personne n'a pas écrit. Le récapitulatif garde sa réponse (« Autre : … »). Au créneau, « Aucun de ces créneaux ne me convient » permet de proposer un moment ; Stella le confirme ensuite sur WhatsApp.
+- **« Autre » à chaque question** ouvre un champ libre, et rien ne part tant que la personne n'a pas écrit. Le récapitulatif garde sa réponse (« Autre : … »). Au créneau, « Aucun de ces créneaux ne me convient » ouvre un calendrier : la personne choisit un jour (de demain à 90 jours, sans les dimanches), puis une heure (de 8 h à 19 h 30, toutes les 30 minutes), et « Proposer ce créneau ». « Retour aux créneaux proposés » referme le calendrier. Stella confirme ensuite le moment proposé sur WhatsApp. Les bornes se règlent dans `CONFIG` (`calDays`, `calFrom`, `calTo`).
+- **L'indicatif du numéro** se choisit dans la liste de tous les pays (244, avec leur drapeau, les plus fréquents en tête). La RDC est préréglée pour qui vit en RDC ; ailleurs, c'est le pays du navigateur. Le 0 du format national tombe devant l'indicatif (081… devient +243 81…).
 - **Le logo en grand** referme le parcours.
 
 **`presentation.html`** présente le programme avec le moteur « Site Immersif », et ses boutons ramènent au questionnaire. Les ajouts sont dans `presentation-extras.js` et `.css`, sans modifier `app.js` :
@@ -54,7 +55,7 @@ L'instru est diffusée comme « FREE » beat : en général, c'est gratuit avec 
 | Une phrase qui s'encre | un souffle d'encre |
 | Une réponse choisie, la fin, le logo | deux notes, un arpège, une montée avec accord |
 
-**Au chargement, une première question** : « Avec ou sans le son ? » (« Activer le son » ou « Continuer sans le son »).
+**Au chargement, une première question** : « Avec ou sans musique ? » (« Avec la musique » ou « Sans musique »). Les bruitages jouent dans les deux cas ; seule la musique de fond dépend de la réponse.
 - Ce clic débloque l'audio, que les navigateurs refusent avant tout geste. Ensuite la page continue ; le questionnaire attend même la réponse pour lancer son ouverture.
 - Elle est posée à chaque chargement de page, en style Liquid Glass :
   - le verre réfracte la page derrière lui (sur Chrome et Edge ; ailleurs, un verre flouté) ;
@@ -62,8 +63,8 @@ L'instru est diffusée comme « FREE » beat : en général, c'est gratuit avec 
   - les boutons sont en verre, teinté bronze ou clair, et rebondissent à l'appui ;
   - à la réponse, la carte se replie en pilule vers le haut.
 - Le focus va sur la réponse donnée la fois précédente.
-- Il n'y a plus de bouton dans la barre. La touche M coupe ou remet le son à tout moment.
-- `?son=0` ou `?son=1` dans l'adresse saute la question, pour les captures et les tests. Le choix est retenu pour la visite suivante. `python sources/test_son.py <dossier>` répond « Activer le son » à la question, fait défiler les deux pages, compte les sons déclenchés, puis vérifie que la touche M coupe tout.
+- Il n'y a plus de bouton dans la barre. La touche M coupe ou remet la musique à tout moment ; les bruitages restent.
+- `?son=0` ou `?son=1` dans l'adresse saute la question (sans ou avec musique), pour les captures et les tests. Le choix est retenu pour la visite suivante. `python sources/test_son.py <dossier>` répond « Avec la musique » à la question, fait défiler les deux pages, compte les sons déclenchés, puis vérifie que la touche M coupe la musique et laisse les bruitages.
 
 ## Lancer en local
 

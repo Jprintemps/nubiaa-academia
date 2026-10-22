@@ -271,10 +271,15 @@ img { display: block; }
 .field input:focus { border-color: rgba(var(--bronze-rgb), 0.75); background: rgba(var(--ink-rgb), 0.08); }
 .field .lbl { position: absolute; left: 17px; top: 19px; color: rgba(var(--ink-rgb), 0.5); pointer-events: none; transform-origin: left top; transition: transform .2s cubic-bezier(.2,.8,.2,1), color .2s; }
 .field input:focus + .lbl, .field input:not(:placeholder-shown) + .lbl { transform: translateY(-11px) scale(0.76); color: rgba(var(--ink-rgb), 0.62); }
-.field.has-prefix > input { padding-left: 74px; }
-.field.has-prefix .lbl { left: 75px; }
-.field .prefix { position: absolute; left: 8px; top: 8px; bottom: 8px; width: 58px; display: grid; place-items: center; border-radius: 11px; background: rgba(var(--ink-rgb), 0.08); }
-.field .prefix input { all: unset; width: 100%; text-align: center; font-family: var(--mono); font-size: 0.86rem; }
+.field.has-prefix > input { padding-left: 112px; }
+.field.has-prefix .lbl { left: 113px; }
+/* l'indicatif : un vrai sélecteur de pays, invisible, posé sur le drapeau et le code */
+.field .prefix { position: absolute; left: 8px; top: 8px; bottom: 8px; width: 94px; display: flex; align-items: center; justify-content: center; gap: 4px; border-radius: 11px; background: rgba(var(--ink-rgb), 0.08); transition: background-color .18s; }
+.field .prefix:hover, .field .prefix:focus-within { background: rgba(var(--ink-rgb), 0.12); }
+.field .prefix:focus-within { outline: 2px solid var(--bronze); outline-offset: 1px; }
+.prefix-val { font-family: var(--mono); font-size: 0.86rem; white-space: nowrap; }
+.field .prefix svg { width: 12px; height: 12px; opacity: 0.55; flex: none; }
+.field .prefix select { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; font-size: 16px; appearance: none; border: 0; }
 .field.invalid input { border-color: rgba(176, 71, 47, 0.6); }
 .err { font-size: 0.82rem; color: var(--danger); padding-left: 4px; }
 .err:empty { display: none; }
@@ -295,6 +300,33 @@ img { display: block; }
 .day[aria-checked="true"], .time[aria-checked="true"] { background: var(--bronze); border-color: var(--bronze); color: var(--on-bronze); }
 .day[aria-checked="true"] small { color: rgba(26, 25, 21, 0.7); }
 .tz { margin-top: 10px; font-size: 0.82rem; color: rgba(var(--ink-rgb), 0.5); }
+
+/* ─── Le calendrier : « Aucun de ces créneaux ne me convient » ─── */
+.picker { margin-top: 18px; }
+.picker[hidden] { display: none; }
+.panel.picking > .days, .panel.picking > .times, .panel.picking > .tz,
+.panel.picking > .actions, .panel.picking > .link-btn { display: none !important; }
+.cal-head { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 8px; }
+.cal-month { text-align: center; font-weight: 500; font-size: 1.05rem; letter-spacing: -0.01em; }
+.cal-nav { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--row); transition: background-color .18s, transform .1s ease-out; }
+.cal-nav:hover { background: var(--row-hover); }
+.cal-nav:active { transform: scale(0.92); }
+.cal-nav[disabled] { opacity: 0.3; cursor: default; }
+.cal-nav svg { width: 16px; height: 16px; }
+.cal-wd, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px 4px; }
+.cal-wd span { text-align: center; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(var(--ink-rgb), 0.45); padding-bottom: 4px; }
+.cal-day { height: 36px; width: 100%; border-radius: 12px; font-size: 0.95rem; font-variant-numeric: tabular-nums; transition: background-color .18s, color .18s, transform .1s ease-out; }
+.cal-day:not([disabled]):hover { background: var(--row-hover); }
+.cal-day:not([disabled]):active { transform: scale(0.92); }
+.cal-day[disabled] { color: rgba(var(--ink-rgb), 0.22); cursor: default; }
+.cal-day[aria-checked="true"] { background: var(--bronze); color: var(--on-bronze); font-weight: 500; }
+.cal-lbl { margin: 16px 0 8px; color: rgba(var(--ink-rgb), 0.5); }
+.cal-times { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.cal-time { height: 36px; border-radius: 12px; background: var(--row); border: 1px solid rgba(var(--ink-rgb), 0.07); font-family: var(--mono); font-size: 0.78rem; white-space: nowrap; transition: background-color .18s, border-color .18s, transform .1s ease-out; }
+.cal-time:hover { background: var(--row-hover); }
+.cal-time:active { transform: scale(0.95); }
+.cal-time[aria-checked="true"] { background: var(--bronze); border-color: var(--bronze); color: var(--on-bronze); }
+.picker .actions { margin-top: 16px; }
 
 /* ─── Fin ─── */
 .done .pin { display: grid; place-items: center; padding: 96px var(--gutter) 40px; }
@@ -337,6 +369,7 @@ img { display: block; }
   .q .floats figure:nth-child(2) { right: 6%; bottom: auto; top: 24%; width: 74px; }
   .panel { left: 12px; right: 12px; width: auto; top: auto; bottom: calc(12px + env(safe-area-inset-bottom)); max-height: calc(100 * var(--vh) - 100px); padding: 24px 18px 18px; border-radius: 24px; --base: 0%; }
   .days { margin: 20px -18px 0; padding: 2px 18px 4px; }
+  .cal-times { grid-template-columns: repeat(4, 1fr); }
   .opt .lab small { display: none; }
   .opt { min-height: 56px; gap: 12px; }
   .opt .ico { width: 38px; height: 38px; border-radius: 12px; }

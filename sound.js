@@ -6,12 +6,14 @@
    Sous les effets, une instru rap en boucle : « Cutthroat », prod.
    Syndrome (audio/musique-fond.mp3).
 
-   Au chargement, une première question : avec ou sans le son ?
-   Ce clic débloque l'audio (les navigateurs l'exigent), puis la
-   page continue. Elle est posée à chaque chargement, en style Liquid
-   Glass, le focus sur la réponse donnée la fois précédente. La touche
-   M coupe ou remet le son à tout moment. `?son=0` ou `?son=1` dans l'adresse
-   saute la question (captures et tests).
+   Au chargement, une première question : avec ou sans musique ?
+   Les bruitages jouent dans les deux cas ; seule la musique de fond
+   dépend de la réponse. Ce clic débloque l'audio (les navigateurs
+   l'exigent), puis la page continue. Elle est posée à chaque
+   chargement, en style Liquid Glass, le focus sur la réponse donnée
+   la fois précédente. La touche M coupe ou remet la musique à tout
+   moment. `?son=0` ou `?son=1` dans l'adresse saute la question
+   (sans ou avec musique, pour les captures et les tests).
 
    API :
    · NubiaaSound.play(nom)
@@ -26,7 +28,7 @@
   const D4 = 293.66;
   const hz = (deg, oct = 0) => D4 * Math.pow(2, (HIJAZ[((deg % 7) + 7) % 7] + 12 * (oct + Math.floor(deg / 7))) / 12);
 
-  let ctx = null, out = null, verb = null, on = false;
+  let ctx = null, out = null, verb = null, on = false, musicWanted = false;   // on : les bruitages ; musicWanted : la musique
   const lastPlay = {}, lastCue = {};
 
   // la réponse vaut pour la visite (sessionStorage), pas pour toujours
@@ -124,7 +126,7 @@
     pauseTimer = setTimeout(() => track.pause(), 700);
   }
   document.addEventListener('visibilitychange', () => {
-    if (!track || !on) return;
+    if (!track || !musicWanted) return;
     if (document.hidden) stopMusic(); else startMusic();
   });
 
@@ -200,19 +202,18 @@
     play(Array.isArray(names) ? names[fwd ? 0 : 1] : names);
   }
 
-  function setOn(v) {
-    on = v;
+  // les bruitages s'allument au premier geste et restent ; la musique suit le choix
+  function setMusic(v) {
+    musicWanted = v;
     remember(v);
-    if (v) {
-      if (!ctx) build();
-      ctx.resume();
+    if (!ctx) build();
+    ctx.resume();
+    if (!on) {
+      on = true;
       out.gain.cancelScheduledValues(ctx.currentTime);
       out.gain.setTargetAtTime(0.9, ctx.currentTime, 0.08);
-      startMusic();
-    } else if (ctx) {
-      stopMusic();
-      out.gain.setTargetAtTime(0, ctx.currentTime, 0.25);
     }
+    if (v) startMusic(); else stopMusic();
   }
 
   /* ─── la première question : avec ou sans le son ? ─── */
@@ -338,13 +339,13 @@
       <div class="snd-card">
         <div class="snd-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         <p class="snd-kicker">NUBIAA Academia</p>
-        <h2 id="sndAskTitle">Avec ou sans le son ?</h2>
-        <p class="snd-text">Une musique douce et des effets accompagnent le défilement. Vous pouvez aussi continuer en silence.</p>
+        <h2 id="sndAskTitle">Avec ou sans musique ?</h2>
+        <p class="snd-text">Des bruitages accompagnent chaque mouvement de la page. Ajoutez une musique de fond si vous le souhaitez.</p>
         <div class="snd-actions">
-          <button type="button" class="snd-yes" data-sound="on">Activer le son</button>
-          <button type="button" class="snd-no" data-sound="off">Continuer sans le son</button>
+          <button type="button" class="snd-yes" data-sound="on">Avec la musique</button>
+          <button type="button" class="snd-no" data-sound="off">Sans musique</button>
         </div>
-        <p class="snd-hint">Touche M pour couper ou remettre le son</p>
+        <p class="snd-hint">Touche M pour couper ou remettre la musique</p>
       </div>`;
     document.body.appendChild(box);
     const card = box.querySelector('.snd-card');
@@ -356,7 +357,7 @@
     const html = document.documentElement, prevOverflow = html.style.overflow;
     html.style.overflow = 'hidden';
     requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('in')));
-    // le focus va sur la réponse donnée la dernière fois, sinon sur « Activer le son »
+    // le focus va sur la réponse donnée la dernière fois, sinon sur « Avec la musique »
     const first = box.querySelector(previous === '0' ? '.snd-no' : '.snd-yes');
     setTimeout(() => first.focus({ preventScroll: true }), 60);
 
@@ -379,8 +380,8 @@
     box.addEventListener('pointerleave', unpress);
 
     const choose = (v) => {
-      setOn(v);
-      if (v) setTimeout(() => play('select'), 40);
+      setMusic(v);
+      setTimeout(() => play('select'), 40);
       box.classList.add('out');
       html.style.overflow = prevOverflow;
       removeEventListener('keydown', onKey, true);
@@ -405,34 +406,33 @@
 
   // la question est posée à chaque chargement ; `?son=0` ou `?son=1` la saute (captures et tests)
   const forced = new URLSearchParams(location.search).get('son');
-  if (forced === '1') {
+  if (forced === '1' || forced === '0') {
+    // pas de question : l'audio démarre au premier geste, avec ou sans musique
     const resume = () => {
-      if (!on) setOn(true);
+      if (!on) setMusic(forced === '1');
       removeEventListener('pointerdown', resume, true);
       removeEventListener('keydown', resume, true);
     };
     addEventListener('pointerdown', resume, true);
     addEventListener('keydown', resume, true);
-    resolveReady(true);
-  } else if (forced === '0') {
-    resolveReady(false);
+    resolveReady(forced === '1');
   } else {
     ask(remembered());
   }
 
-  // M coupe ou remet le son, à tout moment
+  // M coupe ou remet la musique, à tout moment
   addEventListener('keydown', (e) => {
     if (e.key !== 'm' && e.key !== 'M') return;
     if ((e.target.closest && e.target.closest('input, textarea')) || e.metaKey || e.ctrlKey || e.altKey) return;
     if (document.querySelector('.snd-ask')) return;
-    setOn(!on);
-    if (on) setTimeout(() => play('select'), 40);
+    setMusic(!musicWanted);
+    play('tick');
   });
   document.addEventListener('visibilitychange', () => {
     if (!ctx || !on) return;
     if (document.hidden) ctx.suspend(); else ctx.resume();
   });
 
-  const api = { play, cue, ready, onplay: null, get enabled() { return on; }, get music() { return !!music; }, get musicTime() { return track ? track.currentTime : 0; } };
+  const api = { play, cue, ready, onplay: null, get enabled() { return on; }, get music() { return !!music; }, get musicWanted() { return musicWanted; }, get musicTime() { return track ? track.currentTime : 0; } };
   window.NubiaaSound = api;
 })();
