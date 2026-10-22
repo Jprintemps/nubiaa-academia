@@ -66,7 +66,7 @@
   if (name) {
     const logo = document.createElement('div');
     logo.className = 'footer-logo';
-    logo.innerHTML = '<img src="images/logo-creme.png" alt="NUBIAA Academia" width="1120" height="348">';
+    logo.innerHTML = '<img src="images/logo.png" alt="NUBIAA Academia" width="1120" height="348">';
     name.after(logo);
     name.classList.add('replaced');
     if (reduced) logo.classList.add('in');
@@ -88,7 +88,7 @@
     const word = $('.dock-wordmark', dock);
     const brand = document.createElement('div');
     brand.className = 'bar-brand';
-    brand.innerHTML = '<img src="images/mark-creme.png" alt="" width="22" height="22">';
+    brand.innerHTML = '<img src="images/mark.png" alt="" width="22" height="22">';
     word.before(brand);
     brand.appendChild(word);
     count = document.createElement('p');

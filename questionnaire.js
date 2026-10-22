@@ -167,23 +167,23 @@ function dunes(svg, { w, h, rows, seed, fills, traces }) {
       const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
       top += ` C${x0 + row.step * 0.45} ${y0} ${x1 - row.step * 0.45} ${y1} ${x1} ${y1}`;
     }
-    out += `<path d="${top} L${w + 200} ${h} L-200 ${h} Z" fill="${fills[ri]}"/>`;
+    out += `<path d="${top} L${w + 200} ${h} L-200 ${h} Z" style="fill:${fills[ri]}"/>`;
     if (row.ridge) out += `<path d="${top}" fill="none" stroke="rgba(195,150,105,${row.ridge})" stroke-width="1.4" vector-effect="non-scaling-stroke"/>`;
   });
   // pistes de circuit posées sur le sable, à 45°, terminées par une pastille
   (traces || []).forEach((t) => {
     let x = t.x, y = t.y, d = `M${x} ${y}`;
     t.path.forEach(([dx, dy]) => { x += dx; y += dy; d += ` L${x} ${y}`; });
-    out += `<path d="${d}" fill="none" stroke="rgba(195,150,105,${t.o})" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d}" fill="none" style="stroke:rgb(var(--trace-rgb));stroke-opacity:${t.o}" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
     out += `<circle cx="${x}" cy="${y}" r="14" fill="rgba(214,170,120,${t.o * 0.2})"/>`;
-    out += `<circle cx="${x}" cy="${y}" r="4.5" fill="#141311" stroke="rgba(214,170,120,${t.o + 0.25})" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
+    out += `<circle cx="${x}" cy="${y}" r="4.5" style="fill:var(--bone);stroke:rgb(var(--trace-rgb));stroke-opacity:${t.o + 0.25}" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
   });
   svg.innerHTML = out;
 }
-dunes($('#duneFar'), { w: 2400, h: 600, seed: 3, rows: [{ y: 260, amp: 160, step: 420, ridge: 0.18 }], fills: ['#1c1814'] });
-dunes($('#duneMid'), { w: 2400, h: 500, seed: 11, rows: [{ y: 240, amp: 150, step: 520, ridge: 0.28 }], fills: ['#151310'] });
+dunes($('#duneFar'), { w: 2400, h: 600, seed: 3, rows: [{ y: 260, amp: 160, step: 420, ridge: 0.18 }], fills: ['var(--dune-far)'] });
+dunes($('#duneMid'), { w: 2400, h: 500, seed: 11, rows: [{ y: 240, amp: 150, step: 520, ridge: 0.28 }], fills: ['var(--dune-mid)'] });
 dunes($('#duneNear'), {
-  w: 2400, h: 400, seed: 29, rows: [{ y: 170, amp: 110, step: 600, ridge: 0.4 }], fills: ['#0e0d0c'],
+  w: 2400, h: 400, seed: 29, rows: [{ y: 170, amp: 110, step: 600, ridge: 0.4 }], fills: ['var(--dune-near)'],
   traces: [
     { x: 260, y: 400, o: 0.55, path: [[0, -90], [60, -60], [190, 0]] },
     { x: 1080, y: 400, o: 0.42, path: [[0, -70], [-50, -50], [0, -30]] },
@@ -292,7 +292,7 @@ const outro = document.createElement('section');
 outro.className = 'scene outro';
 outro.id = 'logo';
 outro.hidden = true;
-outro.innerHTML = `<div class="pin"><div class="outro-in"><img src="images/logo-creme.png" alt="NUBIAA Academia" width="1120" height="348"><p class="mono">Ça vous plaît ? Fabriquez-le.</p></div></div>`;
+outro.innerHTML = `<div class="pin"><div class="outro-in"><img src="images/logo.png" alt="NUBIAA Academia" width="1120" height="348"><p class="mono">Ça vous plaît ? Fabriquez-le.</p></div></div>`;
 flow.appendChild(outro);
 
 /* ─── Jours ouvrés à venir (le dimanche est sauté) ─── */

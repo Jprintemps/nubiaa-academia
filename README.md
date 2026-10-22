@@ -20,6 +20,13 @@
 - **Les étapes.** Une icône par étape.
 - **La fin.** Le grand logo, révélé en rideau.
 
+**Deux thèmes, clair et sombre** (`theme.js`) : le site prend le thème du téléphone ou de l'ordinateur, et change en direct si on le modifie dans les réglages.
+- `theme.js` est chargé en premier dans le `<head>`. Il pose `<html data-theme="dark">` ou `"light"` avant l'affichage : la page ne clignote pas dans la mauvaise couleur.
+- Les styles du thème clair sont la base de `questionnaire.css`. Le thème sombre se trouve à la fin du fichier, sous `[data-theme="dark"]`. La page programme utilise les deux thèmes du moteur ; `presentation-extras.css` règle la barre et la crème du fond.
+- **Les images** existent en deux séries, sous les mêmes noms : `images/` pour le thème sombre (noir → bronze → crème) et `images/clair/` pour le thème clair (bronze → sable → blanc cassé). En thème clair, `theme.js` fait pointer toutes les images vers `images/clair/`, y compris celles que les scripts ajoutent plus tard. Le logo et le monogramme sont crème en sombre, encre en clair.
+- Trois images Codex de nuit ou de coucher de soleil ont une version de jour pour le thème clair : `14-dunes-jour`, `15-puce-sable-jour` et `16-dunes-traces-jour`. `python sources/build_images.py` refait les deux séries.
+- `?theme=clair` ou `?theme=sombre` dans l'adresse force un thème, pour les captures. `python sources/captures.py <dossier> clair` capture le questionnaire en thème clair (même chose pour `captures_presentation.py`).
+
 **Le son** (`sound.js`) : une musique de fond, et un effet sonore par mouvement.
 
 **La musique** est l'instru « Cutthroat » de Syndrome (`audio/musique-fond.mp3`, 2 min 39, réencodée en 112 kb/s avec le volume égalisé). Elle tourne en boucle sous les effets :
