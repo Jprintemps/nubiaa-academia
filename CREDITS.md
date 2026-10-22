@@ -58,3 +58,11 @@ Générées mais pas utilisées (gardées dans `gen/`) : `01-hero` (pyramides) e
 ## Polices
 
 **Bricolage Grotesque** (Mathieu Triay) et **DM Mono** (Colophon Foundry), sous licence SIL Open Font License 1.1, copiées de Google Fonts dans `fonts/` (sous-ensembles latin et latin étendu ; Bricolage limitée aux graisses 300 à 600).
+
+## Villes
+
+La liste des villes proposées quand on habite hors de la RDC (`villes/*.json`) vient de **GeoNames** (geonames.org), sous licence Creative Commons Attribution 4.0 : les villes de plus de 15 000 habitants (`cities15000`), avec leur nom français (`alternateNamesV2`). Préparée par `sources/build_villes.py`.
+
+## Logo
+
+Le thème clair utilise le logo en chocolat dégradé (`sources/marque/logo-choco.png`, `mark-choco.png`), le thème sombre le logo crème.

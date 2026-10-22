@@ -102,12 +102,20 @@ Depuis `D:\Claude\contenu\nubia-mind`, puis ouvrir http://localhost:4386.
 | Textes de la page programme | `content.js`, moitié haute uniquement |
 | Ajouts de la page programme (devise, icônes, logo) | `sources/presentation-extras.src.js`, puis `python sources/build_presentation.py` |
 | Musique et effets | `sound.js` |
+| Base des villes (« Hors de la RDC ») | `python sources/build_villes.py <dossier GeoNames>` : lit `cities15000.zip` et `alternateNamesV2.zip`, écrit `villes/a.json` … `z.json` |
+| Longueur des numéros par pays, limites des champs | `TEL_LEN` et `LIM` dans `sources/questionnaire.src.js` |
 
 ## Contrôles
 
 - `python sources/captures.py <dossier>` : captures de chaque scène en desktop et en mobile, avec Edge. On peut aussi viser une scène à la main avec `?apercu=q-budget:0.06`.
 - `python sources/captures_presentation.py <dossier>` : la même chose pour la page programme.
 - `python sources/test_parcours.py <dossier>` : clique tout le parcours comme un visiteur, avec une réponse « Autre ». Il vérifie l'ouverture des scènes, la progression, la fin, le récapitulatif et la réécriture de la question 4.
+- `python sources/test_failles.py [filtre]` : la chasse aux failles, plus de 60 tests. Elle couvre :
+  - le bouton « Commencer », seul passage, qui s'illumine quand on insiste ;
+  - « Autre » et la ville obligatoires, le parcours élève et parent ;
+  - les noms, e-mails et numéros piégés, la liste des pays, la musique quand on quitte l'onglet ;
+  - les doubles clics, les petits écrans, le poids des pages et la fluidité.
+- `python sources/test_fluidite.py [index|presentation] [ralenti]` : mesure les images trop lentes au défilement, sur un téléphone simulé.
 
 Mettre le `<dossier>` sur D: : le disque C: est presque plein.
 

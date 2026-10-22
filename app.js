@@ -231,11 +231,19 @@
       s.lastP = -1;
     });
   }
+  // n'écrire un style que s'il change : une valeur identique réécrite coûte quand même un recalcul
+  const written = new WeakMap();
+  function put(el, prop, v) {
+    let c = written.get(el);
+    if (!c) written.set(el, (c = {}));
+    if (c[prop] !== v) { c[prop] = v; el.style[prop] = v; }
+  }
+
   function renderScenes(pos) {
     scenes.forEach((s) => {
       if (pos + vh < s.start - vh || pos > s.start + s.len + vh * 2) return;
       const y = clamp(pos - s.start, 0, s.len);
-      s.pin.style.transform = `translate3d(0, ${y}px, 0)`;
+      put(s.pin, 'transform', String(`translate3d(0, ${y}px, 0)`));
       const p = clamp((pos - s.start) / s.len, 0, 1);
       if (Math.abs(p - s.lastP) < 0.0004) return;
       s.lastP = p;
@@ -255,6 +263,7 @@
   function measureFloaters() {
     flDirs = floaters.map((f) => {
       f.style.transform = 'none';   // mesurer la position au repos, sans le transform du frame précédent
+      written.delete(f);
       const r = f.getBoundingClientRect();
       const ex = r.left + r.width / 2 - vw / 2;
       const ey = r.top + r.height / 2 - vh / 2;
@@ -277,12 +286,12 @@
       const dist = drift * (0.8 + dir.d) * vh * 1.15;
       const tx = -dir.ex * pull + dir.x * dist + mx * dir.d * 40;
       const ty = -dir.ey * pull + dir.y * dist + my * dir.d * 26;
-      f.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotate(${(drift * dir.d * (i % 2 ? 8 : -8)).toFixed(2)}deg) scale(${flScale.toFixed(3)})`;
+      put(f, 'transform', String(`translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotate(${(drift * dir.d * (i % 2 ? 8 : -8)).toFixed(2)}deg) scale(${flScale.toFixed(3)})`));
     });
 
     // le kicker et la ligne 1 s'estompent sur place…
-    heroKicker.style.opacity = 1 - seg(p, 0.01, 0.10);
-    heroLine1.style.opacity = 1 - seg(p, 0.03, 0.15);
+    put(heroKicker, 'opacity', String(1 - seg(p, 0.01, 0.10)));
+    put(heroLine1, 'opacity', String(1 - seg(p, 0.03, 0.15)));
     // …puis la ligne 2 monte occuper le centre, SEULE, avant tout zoom
     const lift = seg(p, 0.05, 0.22, easeInOut);
 
@@ -296,8 +305,8 @@
     const fadeOut = seg(p, 0.82, 0.92);
     introWords.forEach((w, i) => {
       const k = seg(p, 0.50 + i * 0.022, 0.60 + i * 0.022, easeOut);
-      w.style.opacity = (k * (1 - fadeOut)).toFixed(3);
-      w.style.transform = `translateY(${((1 - k) * 14).toFixed(1)}px)`;
+      put(w, 'opacity', String((k * (1 - fadeOut)).toFixed(3)));
+      put(w, 'transform', String(`translateY(${((1 - k) * 14).toFixed(1)}px)`));
     });
   });
 
@@ -335,7 +344,7 @@
     for (const a of arrivals) {
       const t = seg(pos + vh, a.top + 60, a.top + 60 + vh * 0.6, easeOut);
       const k = 1 - t;
-      a.card.style.transform = `translate3d(${(a.dx * k).toFixed(1)}px, ${(a.dy * k).toFixed(1)}px, 0) rotate(${(a.rot * k).toFixed(2)}deg)`;
+      put(a.card, 'transform', String(`translate3d(${(a.dx * k).toFixed(1)}px, ${(a.dy * k).toFixed(1)}px, 0) rotate(${(a.rot * k).toFixed(2)}deg)`));
     }
   }
 
@@ -364,17 +373,16 @@
     const first = mottoWords[0].center;
     const last = mottoWords[mottoWords.length - 1].center;
     const x = vw / 2 - mix(first, last, t);
-    mottoTrack.style.transform = `translate(${x.toFixed(1)}px, -50%)`;
-
+    put(mottoTrack, 'transform', String(`translate(${x.toFixed(1)}px, -50%)`));
     let best = 0, bestD = 1e9;
     mottoWords.forEach((w, wi) => {
       const rel = clamp((w.center + x - vw / 2) / vw, -1.3, 1.3);
       const d = Math.abs(rel);
       if (d < bestD) { bestD = d; best = wi; }
       // loin du centre : lettres dispersées et mot en retrait ; au centre : posé
-      w.el.style.opacity = (1 - Math.min(d * 1.1, 0.75)).toFixed(3);
+      put(w.el, 'opacity', String((1 - Math.min(d * 1.1, 0.75)).toFixed(3)));
       w.chars.forEach((c, i) => {
-        c.style.transform = `translate3d(0, ${(w.amps[i] * rel * vh * 0.3).toFixed(1)}px, 0) rotate(${(w.amps[i] * rel * 6).toFixed(2)}deg)`;
+        put(c, 'transform', String(`translate3d(0, ${(w.amps[i] * rel * vh * 0.3).toFixed(1)}px, 0) rotate(${(w.amps[i] * rel * 6).toFixed(2)}deg)`));
       });
     });
 
@@ -405,8 +413,8 @@
     // intro : les mots se posent, l'image naît entre eux
     nightWords.forEach((w, i) => {
       const k = seg(p, 0.01 + i * 0.024, 0.06 + i * 0.024, easeOut);
-      w.style.opacity = k.toFixed(3);
-      w.style.transform = `translateY(${((1 - k) * 16).toFixed(1)}px)`;
+      put(w, 'opacity', String(k.toFixed(3)));
+      put(w, 'transform', String(`translateY(${((1 - k) * 16).toFixed(1)}px)`));
     });
     // le zoom atteint le plein écran PUIS continue d'avancer :
     // la caméra ne recule jamais, c'est le rideau qui coupe.
@@ -419,32 +427,31 @@
       const j = slats.length - 1 - i;
       const cover = seg(p, 0.30 + i * 0.005, 0.360 + i * 0.005, easeInOut);
       const clear = seg(p, 0.42 + j * 0.005, 0.480 + j * 0.005, easeInOut);
-      sl.style.transformOrigin = clear > 0 ? 'top' : 'bottom';
-      sl.style.transform = `scaleY(${(cover - clear).toFixed(4)})`;
+      put(sl, 'transformOrigin', String(clear > 0 ? 'top' : 'bottom'));
+      put(sl, 'transform', String(`scaleY(${(cover - clear).toFixed(4)})`));
     });
-    nightLineEl.style.opacity = p > 0.41 ? 0 : 1;
-
+    put(nightLineEl, 'opacity', String(p > 0.41 ? 0 : 1));
     // le compteur défile comme un odomètre pendant que l'étape permute
     const cont = seg(p, 0.50, 0.88) * Math.max(STEPS.length - 1, 1);
     // les étapes montent DÈS que le rideau couvre : quand il se retire,
     // la scène est déjà dressée
     const gate = seg(p, 0.335, 0.44);
     if (bigNum) {
-      bigNum.style.opacity = gate.toFixed(3);
-      bigRoll.style.transform = `translateY(${(-cont).toFixed(4)}em)`;
+      put(bigNum, 'opacity', String(gate.toFixed(3)));
+      put(bigRoll, 'transform', String(`translateY(${(-cont).toFixed(4)}em)`));
     }
     stepEls.forEach((el, i) => {
       const d = cont - i;
       // relais asymétrique : l'étape en cours s'efface vite, la suivante
       // entre plus tôt — jamais deux textes en pleine opacité, jamais de trou
       const vis = d >= 0 ? clamp(1 - d / 0.35, 0, 1) : clamp((d + 0.75) / 0.4, 0, 1);
-      el.style.opacity = (vis * gate).toFixed(3);
-      el.style.transform = `translateY(calc(-50% + ${(-d * 96).toFixed(1)}px))`;
+      put(el, 'opacity', String((vis * gate).toFixed(3)));
+      put(el, 'transform', String(`translateY(calc(-50% + ${(-d * 96).toFixed(1)}px))`));
     });
     // conversion : le CTA conclut le voyage, ovale dessiné à la main
     const eCta = seg(p, 0.89, 0.94, easeOut);
-    stepsCta.style.opacity = eCta;
-    stepsCta.style.transform = `translate(-50%, ${((1 - eCta) * 26).toFixed(1)}px)`;
+    put(stepsCta, 'opacity', String(eCta));
+    put(stepsCta, 'transform', String(`translate(-50%, ${((1 - eCta) * 26).toFixed(1)}px)`));
     ctaOvalDraw(1 - seg(p, 0.92, 0.99));
   });
 
@@ -464,26 +471,23 @@
 
   addScene('.s-quote', (p) => {
     const g = seg(p, 0.03, 0.15, easeOut);
-    qGlyph.style.opacity = g.toFixed(3);
-    qGlyph.style.transform = `translateY(${((1 - g) * 28).toFixed(1)}px)`;
-
+    put(qGlyph, 'opacity', String(g.toFixed(3)));
+    put(qGlyph, 'transform', String(`translateY(${((1 - g) * 28).toFixed(1)}px)`));
     // la parole, d'un bloc : c'est elle qu'on vient lire
     const t = seg(p, 0.11, 0.36, easeOut);
-    qText.style.opacity = t.toFixed(3);
-    qText.style.transform = `translateY(${((1 - t) * 32).toFixed(1)}px)`;
-
+    put(qText, 'opacity', String(t.toFixed(3)));
+    put(qText, 'transform', String(`translateY(${((1 - t) * 32).toFixed(1)}px)`));
     // le filet se trace de gauche à droite, puis la signature se pose
-    qRule.style.transform = `scaleX(${seg(p, 0.38, 0.58, easeInOut).toFixed(4)})`;
+    put(qRule, 'transform', String(`scaleX(${seg(p, 0.38, 0.58, easeInOut).toFixed(4)})`));
     const n = seg(p, 0.52, 0.64, easeOut);
-    qName.style.opacity = n.toFixed(3);
-    qName.style.transform = `translateY(${((1 - n) * 14).toFixed(1)}px)`;
+    put(qName, 'opacity', String(n.toFixed(3)));
+    put(qName, 'transform', String(`translateY(${((1 - n) * 14).toFixed(1)}px)`));
     const c = seg(p, 0.57, 0.69, easeOut);
-    qCtx.style.opacity = c.toFixed(3);
-    qCtx.style.transform = `translateY(${((1 - c) * 14).toFixed(1)}px)`;
-
+    put(qCtx, 'opacity', String(c.toFixed(3)));
+    put(qCtx, 'transform', String(`translateY(${((1 - c) * 14).toFixed(1)}px)`));
     if (hasFig) {
       const f = seg(p, 0.58, 0.84, easeOut);
-      bigFigure.style.opacity = Math.min(1, f * 3.5).toFixed(3);
+      put(bigFigure, 'opacity', String(Math.min(1, f * 3.5).toFixed(3)));
       const v = (FIG_TARGET * f).toFixed(FIG_DEC);
       if (v !== figLast) { figVal.textContent = v; figLast = v; }
     }
@@ -559,11 +563,11 @@
   /* ═══════════ RENDU ═══════════ */
   function render(pos) {
     if (!staticMode) {
-      wrapper.style.transform = `translate3d(0, ${-pos.toFixed(1)}px, 0)`;
+      put(wrapper, 'transform', String(`translate3d(0, ${-pos.toFixed(1)}px, 0)`));
       renderScenes(pos);
       renderArrivals(pos);
       for (const px of pxCache) {
-        px.el.style.transform = `translate3d(0, ${((pos + vh / 2 - (px.top + px.h / 2)) * px.speed).toFixed(2)}px, 0)`;
+        put(px.el, 'transform', String(`translate3d(0, ${((pos + vh / 2 - (px.top + px.h / 2)) * px.speed).toFixed(2)}px, 0)`));
       }
     }
     checkReveals(pos);

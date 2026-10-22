@@ -113,13 +113,13 @@
     musicBus.gain.setValueAtTime(musicBus.gain.value, ctx.currentTime);
     musicBus.gain.linearRampToValueAtTime(to, ctx.currentTime + dur);
   }
-  function startMusic() {
+  function startMusic(fade = 3) {
     if (music) return;
     if (!musicBus) musicChain();
     music = true;
     clearTimeout(pauseTimer);
-    track.play().catch(() => { music = null; });
-    fadeMusic(MUSIC_LEVEL, 3);                                          // fondu d'entrée
+    track.play().catch(() => { music = null; retryOnGesture(); });
+    fadeMusic(MUSIC_LEVEL, fade);                                       // fondu d'entrée
   }
   function stopMusic() {
     if (!music) return;
@@ -127,10 +127,45 @@
     fadeMusic(0, 0.6);
     pauseTimer = setTimeout(() => track.pause(), 700);
   }
-  document.addEventListener('visibilitychange', () => {
-    if (!track || !musicWanted) return;
-    if (document.hidden) stopMusic(); else startMusic();
-  });
+  // le navigateur refuse parfois de relancer le son au retour (téléphone resté longtemps en veille) :
+  // il repart au premier geste
+  function retryOnGesture() {
+    const go = () => {
+      removeEventListener('pointerdown', go, true); removeEventListener('keydown', go, true);
+      if (ctx) ctx.resume();
+      if (musicWanted && !document.hidden) startMusic(1.2);
+    };
+    addEventListener('pointerdown', go, true); addEventListener('keydown', go, true);
+  }
+
+  /* L'onglet quitté (autre onglet, autre application, écran verrouillé) : la musique se met
+     en pause tout de suite et tout l'audio s'endort. Au retour, elle reprend où elle en était,
+     en fondu court, si elle jouait au départ. */
+  let pausedByHide = false;
+  function onHide() {
+    if (!ctx) return;
+    if (music) {
+      pausedByHide = true;
+      music = null;
+      clearTimeout(pauseTimer);
+      musicBus.gain.cancelScheduledValues(ctx.currentTime);
+      musicBus.gain.setValueAtTime(0, ctx.currentTime);
+      track.pause();
+    }
+    ctx.suspend();
+  }
+  function onShow() {
+    if (!ctx || document.hidden) return;
+    const back = () => {
+      if (pausedByHide && musicWanted) startMusic(1.2);
+      pausedByHide = false;
+    };
+    if (!on) { pausedByHide = false; return; }
+    ctx.resume().then(back, back);
+  }
+  document.addEventListener('visibilitychange', () => (document.hidden ? onHide() : onShow()));
+  addEventListener('pagehide', onHide);
+  addEventListener('pageshow', onShow);
 
   /* ─── les sons, un par mouvement ─── */
   const FX = {
@@ -425,14 +460,11 @@
   // M coupe ou remet la musique, à tout moment
   addEventListener('keydown', (e) => {
     if (e.key !== 'm' && e.key !== 'M') return;
-    if ((e.target.closest && e.target.closest('input, textarea')) || e.metaKey || e.ctrlKey || e.altKey) return;
+    // pas pendant qu'on écrit (un nom comme « Mbuyi », une recherche de pays…)
+    if ((e.target.closest && e.target.closest('input, textarea, select, [contenteditable], [role="combobox"]')) || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
     if (document.querySelector('.snd-ask')) return;
     setMusic(!musicWanted);
     play('tick');
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (!ctx || !on) return;
-    if (document.hidden) ctx.suspend(); else ctx.resume();
   });
 
   const api = { play, cue, ready, onplay: null, get enabled() { return on; }, get music() { return !!music; }, get musicWanted() { return musicWanted; }, get musicTime() { return track ? track.currentTime : 0; } };
