@@ -49,7 +49,12 @@
 
 **Au chargement, une première question** : « Avec ou sans le son ? » (« Activer le son » ou « Continuer sans le son »).
 - Ce clic débloque l'audio, que les navigateurs refusent avant tout geste. Ensuite la page continue ; le questionnaire attend même la réponse pour lancer son ouverture.
-- La réponse vaut pour toute la visite : on ne la repose pas en passant d'une page à l'autre.
+- Elle est posée à chaque chargement de page, en style Liquid Glass :
+  - le verre réfracte la page derrière lui (sur Chrome et Edge ; ailleurs, un verre flouté) ;
+  - un liseré de lumière borde la carte, et un reflet suit le pointeur ;
+  - les boutons sont en verre, teinté bronze ou clair, et rebondissent à l'appui ;
+  - à la réponse, la carte se replie en pilule vers le haut.
+- Le focus va sur la réponse donnée la fois précédente.
 - Il n'y a plus de bouton dans la barre. La touche M coupe ou remet le son à tout moment.
 - `?son=0` ou `?son=1` dans l'adresse saute la question, pour les captures et les tests. Le choix est retenu pour la visite suivante. `python sources/test_son.py <dossier>` répond « Activer le son » à la question, fait défiler les deux pages, compte les sons déclenchés, puis vérifie que la touche M coupe tout.
 

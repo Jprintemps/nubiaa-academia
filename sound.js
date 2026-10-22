@@ -9,9 +9,9 @@
 
    Au chargement, une première question : avec ou sans le son ?
    Ce clic débloque l'audio (les navigateurs l'exigent), puis la
-   page continue. La réponse vaut pour toute la visite : on ne la
-   repose pas en passant d'une page à l'autre. La touche M coupe ou
-   remet le son à tout moment. `?son=0` ou `?son=1` dans l'adresse
+   page continue. Elle est posée à chaque chargement, en style Liquid
+   Glass, le focus sur la réponse donnée la fois précédente. La touche
+   M coupe ou remet le son à tout moment. `?son=0` ou `?son=1` dans l'adresse
    saute la question (captures et tests).
 
    API :
@@ -307,43 +307,86 @@
   const ready = new Promise((r) => { resolveReady = r; });
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function ask() {
+  function ask(previous) {
+    /* Liquid Glass, version web :
+       · le verre réfracte vraiment l'arrière-plan : un filtre SVG
+         (turbulence + déplacement) appliqué au flou de fond, sur
+         Chromium ; ailleurs, un verre flouté classique ;
+       · un liseré de lumière sur les bords, plus vif en haut à gauche ;
+       · un reflet qui suit le pointeur (le verre réagit au toucher) ;
+       · des boutons en verre : teinté bronze pour le choix principal,
+         clair pour l'autre, qui s'enfoncent puis rebondissent ;
+       · à la réponse, la carte se replie en pilule vers le haut. */
     const style = document.createElement('style');
     style.textContent = `
       .snd-ask { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 20px;
-        background: rgba(10, 9, 8, 0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-        touch-action: none; opacity: 0; transition: opacity .45s ease; }
+        background: radial-gradient(80% 70% at 50% 45%, rgba(10, 9, 8, 0.12), rgba(10, 9, 8, 0.5));
+        touch-action: none; opacity: 0; transition: opacity .5s ease; }
       .snd-ask.in { opacity: 1; }
-      .snd-card { width: min(420px, 100%); padding: 30px 26px 24px; border-radius: 28px; text-align: center;
-        color: #f2f1ec; font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-        background: rgba(28, 27, 24, 0.72); -webkit-backdrop-filter: blur(26px) saturate(150%); backdrop-filter: blur(26px) saturate(150%);
-        border: 1px solid rgba(242, 241, 236, 0.1);
-        box-shadow: inset 0 1px 0 rgba(242, 241, 236, 0.07), 0 30px 80px rgba(0, 0, 0, 0.5);
-        transform: scale(.94); filter: blur(8px); transition: transform .6s cubic-bezier(.19, 1, .22, 1), filter .5s ease; }
+      .snd-lg { position: absolute; width: 0; height: 0; }
+
+      .snd-card { position: relative; width: min(420px, 100%); padding: 32px 26px 24px; border-radius: 34px; text-align: center; isolation: isolate;
+        color: #fbf8f3; font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+        background: linear-gradient(150deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 38%, rgba(255, 255, 255, 0.02) 62%, rgba(255, 255, 255, 0.09) 100%);
+        -webkit-backdrop-filter: blur(16px) saturate(190%) brightness(1.06);
+                backdrop-filter: blur(16px) saturate(190%) brightness(1.06);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.42),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+          inset 0 18px 40px -20px rgba(255, 255, 255, 0.18),
+          0 30px 80px rgba(0, 0, 0, 0.45), 0 6px 18px rgba(0, 0, 0, 0.25);
+        transform: scale(.92); filter: blur(10px);
+        transition: transform .7s cubic-bezier(.2, 1.3, .3, 1), filter .5s ease, border-radius .55s cubic-bezier(.65, 0, .35, 1), opacity .45s ease; }
+      .snd-card.refract { -webkit-backdrop-filter: url(#sndLiquid) blur(16px) saturate(190%) brightness(1.06);
+                                  backdrop-filter: url(#sndLiquid) blur(16px) saturate(190%) brightness(1.06); }
+      /* le liseré : un dégradé de lumière posé sur le bord seulement */
+      .snd-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.2px; pointer-events: none; z-index: 2;
+        background: linear-gradient(140deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.08) 30%, rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.35) 100%);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+      /* le reflet qui suit le pointeur */
+      .snd-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+        background: radial-gradient(240px circle at var(--mx, 30%) var(--my, 0%), rgba(255, 255, 255, 0.16), transparent 60%);
+        mix-blend-mode: screen; transition: opacity .3s; }
+      .snd-card > * { position: relative; z-index: 3; }
       .snd-ask.in .snd-card { transform: none; filter: none; }
-      .snd-ask.out { opacity: 0; }
-      .snd-ask.out .snd-card { transform: scale(.97); filter: blur(6px); }
+      /* sortie : la carte se replie en pilule vers le haut, puis s'efface */
+      .snd-ask.out { opacity: 0; transition: opacity .55s ease .15s; }
+      .snd-ask.out .snd-card { transform: translateY(-38vh) scale(.28, .14); border-radius: 999px; filter: blur(2px); opacity: 0;
+        transition: transform .62s cubic-bezier(.65, 0, .35, 1), border-radius .4s ease, filter .5s ease, opacity .35s ease .3s; }
+      .snd-ask.out .snd-card > * { opacity: 0; transition: opacity .15s; }
+
       .snd-wave { display: flex; justify-content: center; align-items: center; gap: 4px; height: 34px; margin-bottom: 18px; }
-      .snd-wave i { width: 3px; height: 8px; border-radius: 2px; background: #c39669; animation: sndw 1.2s ease-in-out infinite; }
+      .snd-wave i { width: 3px; height: 8px; border-radius: 2px; background: #e2bd8f; box-shadow: 0 0 10px rgba(226, 189, 143, .6); animation: sndw 1.2s ease-in-out infinite; }
       .snd-wave i:nth-child(2) { animation-delay: -.2s; } .snd-wave i:nth-child(3) { animation-delay: -.4s; }
       .snd-wave i:nth-child(4) { animation-delay: -.6s; } .snd-wave i:nth-child(5) { animation-delay: -.8s; }
       @keyframes sndw { 0%, 100% { height: 8px; } 50% { height: 30px; } }
-      .snd-kicker { font: 500 .6875rem/1 'DM Mono', ui-monospace, monospace; letter-spacing: .13em; text-transform: uppercase; color: #c39669; margin: 0 0 12px; }
-      .snd-card h2 { margin: 0; font-weight: 500; font-size: clamp(1.6rem, 6vw, 2.1rem); line-height: 1.08; letter-spacing: -.028em; }
-      .snd-card p.snd-text { margin: 12px 0 0; font-size: .98rem; line-height: 1.5; color: rgba(242, 241, 236, .66); }
+      .snd-kicker { font: 500 .6875rem/1 'DM Mono', ui-monospace, monospace; letter-spacing: .13em; text-transform: uppercase; color: #e2bd8f; margin: 0 0 12px; }
+      .snd-card h2 { margin: 0; font-weight: 500; font-size: clamp(1.6rem, 6vw, 2.1rem); line-height: 1.08; letter-spacing: -.028em; text-shadow: 0 1px 12px rgba(0, 0, 0, .25); }
+      .snd-card p.snd-text { margin: 12px 0 0; font-size: .98rem; line-height: 1.5; color: rgba(251, 248, 243, .78); font-weight: 450; letter-spacing: .005em; }
+
       .snd-actions { display: grid; gap: 10px; margin-top: 24px; }
-      .snd-actions button { min-height: 54px; border: 0; border-radius: 999px; font: 500 1.02rem/1 'Bricolage Grotesque', system-ui, sans-serif;
-        cursor: pointer; transition: transform .1s ease-out, background-color .2s; -webkit-tap-highlight-color: transparent; }
-      .snd-actions button:active { transform: scale(.97); }
-      .snd-yes { background: #c39669; color: #1a1915; box-shadow: 0 10px 30px rgba(195, 150, 105, .24); }
-      .snd-yes:hover { background: #cda47a; }
-      .snd-no { background: rgba(242, 241, 236, .08); color: #f2f1ec; }
-      .snd-no:hover { background: rgba(242, 241, 236, .12); }
-      .snd-actions button:focus-visible { outline: 2px solid #c39669; outline-offset: 3px; }
-      .snd-hint { margin: 16px 0 0; font: 500 .62rem/1.4 'DM Mono', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: rgba(242, 241, 236, .38); }
+      .snd-actions button { position: relative; overflow: hidden; min-height: 54px; border: 0; border-radius: 999px; isolation: isolate;
+        font: 500 1.02rem/1 'Bricolage Grotesque', system-ui, sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent;
+        -webkit-backdrop-filter: blur(10px) saturate(180%); backdrop-filter: blur(10px) saturate(180%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 -1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px rgba(255, 255, 255, .12), 0 8px 24px rgba(0, 0, 0, .22);
+        transition: transform .5s cubic-bezier(.2, 1.6, .35, 1), background-color .2s, box-shadow .2s; }
+      .snd-actions button::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+        background: radial-gradient(120px circle at var(--bx, 50%) var(--by, 0%), rgba(255, 255, 255, .35), transparent 70%); opacity: 0; transition: opacity .25s; }
+      .snd-actions button:hover::after, .snd-actions button.pressed::after { opacity: 1; }
+      .snd-actions button:hover { transform: scale(1.02); }
+      .snd-actions button.pressed { transform: scale(.95); transition-duration: .12s; }
+      /* verre teinté (le choix principal) et verre clair */
+      .snd-yes { color: #1a1915; background: linear-gradient(180deg, rgba(226, 189, 143, .92), rgba(195, 150, 105, .78)); }
+      .snd-no { color: #fbf8f3; background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .06)); }
+      .snd-actions button:focus-visible { outline: 2px solid rgba(226, 189, 143, .9); outline-offset: 3px; }
+      .snd-hint { margin: 16px 0 0; font: 500 .62rem/1.4 'DM Mono', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: rgba(251, 248, 243, .45); }
       @media (hover: none) { .snd-hint { display: none; } }
+      @media (prefers-reduced-transparency: reduce) {
+        .snd-card, .snd-card.refract { background: #24221f; -webkit-backdrop-filter: none; backdrop-filter: none; }
+      }
       @media (prefers-reduced-motion: reduce) {
-        .snd-card, .snd-ask { transition: opacity .2s ease; transform: none !important; filter: none !important; }
+        .snd-card, .snd-ask, .snd-ask.out .snd-card { transition: opacity .2s ease; transform: none !important; filter: none !important; }
         .snd-wave i { animation: none; height: 16px; }
       }`;
     document.head.appendChild(style);
@@ -353,7 +396,15 @@
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
     box.setAttribute('aria-labelledby', 'sndAskTitle');
-    box.innerHTML = `<div class="snd-card">
+    box.innerHTML = `
+      <svg class="snd-lg" aria-hidden="true" focusable="false">
+        <filter id="sndLiquid" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="2" seed="7" result="n"/>
+          <feGaussianBlur in="n" stdDeviation="2" result="nb"/>
+          <feDisplacementMap in="SourceGraphic" in2="nb" scale="38" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </svg>
+      <div class="snd-card">
         <div class="snd-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         <p class="snd-kicker">NUBIAA Academia</p>
         <h2 id="sndAskTitle">Avec ou sans le son ?</h2>
@@ -365,12 +416,36 @@
         <p class="snd-hint">Touche M pour couper ou remettre le son</p>
       </div>`;
     document.body.appendChild(box);
+    const card = box.querySelector('.snd-card');
+    // la vraie réfraction (filtre SVG dans le flou de fond) n'existe que sur Chromium
+    const chromium = !!(navigator.userAgentData && navigator.userAgentData.brands.some((b) => /Chromium/.test(b.brand)));
+    if (chromium) card.classList.add('refract');
+
     // la page ne défile pas tant que la question est posée
     const html = document.documentElement, prevOverflow = html.style.overflow;
     html.style.overflow = 'hidden';
     requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('in')));
-    const yes = box.querySelector('.snd-yes');
-    setTimeout(() => yes.focus({ preventScroll: true }), 60);
+    // le focus va sur la réponse donnée la dernière fois, sinon sur « Activer le son »
+    const first = box.querySelector(previous === '0' ? '.snd-no' : '.snd-yes');
+    setTimeout(() => first.focus({ preventScroll: true }), 60);
+
+    // le verre réagit au pointeur : le reflet suit, les boutons s'enfoncent à l'appui
+    box.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      const btn = e.target.closest('.snd-actions button');
+      if (btn) {
+        const b = btn.getBoundingClientRect();
+        btn.style.setProperty('--bx', `${e.clientX - b.left}px`);
+        btn.style.setProperty('--by', `${e.clientY - b.top}px`);
+      }
+    });
+    box.addEventListener('pointerdown', (e) => { const b = e.target.closest('.snd-actions button'); if (b) b.classList.add('pressed'); });
+    const unpress = () => box.querySelectorAll('.pressed').forEach((b) => b.classList.remove('pressed'));
+    box.addEventListener('pointerup', unpress);
+    box.addEventListener('pointercancel', unpress);
+    box.addEventListener('pointerleave', unpress);
 
     const choose = (v) => {
       setOn(v);
@@ -378,7 +453,7 @@
       box.classList.add('out');
       html.style.overflow = prevOverflow;
       removeEventListener('keydown', onKey, true);
-      setTimeout(() => box.remove(), reducedMotion ? 220 : 520);
+      setTimeout(() => box.remove(), reducedMotion ? 240 : 760);
       resolveReady(v);
     };
     const onKey = (e) => {
@@ -397,10 +472,9 @@
     ['wheel', 'touchmove'].forEach((t) => box.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
   }
 
+  // la question est posée à chaque chargement ; `?son=0` ou `?son=1` la saute (captures et tests)
   const forced = new URLSearchParams(location.search).get('son');
-  const prior = forced !== null ? forced : remembered();
-  if (prior === '1') {
-    // déjà répondu « oui » pendant cette visite : le son repart au premier geste
+  if (forced === '1') {
     const resume = () => {
       if (!on) setOn(true);
       removeEventListener('pointerdown', resume, true);
@@ -409,10 +483,10 @@
     addEventListener('pointerdown', resume, true);
     addEventListener('keydown', resume, true);
     resolveReady(true);
-  } else if (prior === '0') {
+  } else if (forced === '0') {
     resolveReady(false);
   } else {
-    ask();
+    ask(remembered());
   }
 
   // M coupe ou remet le son, à tout moment
