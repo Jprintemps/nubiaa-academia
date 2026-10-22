@@ -3,26 +3,39 @@
    (presentation-extras.js). Chargé après styles.css.
    ═══════════════════════════════════════════════════════════ */
 
-/* ─── Devise : chaque mot devant son image, coupée en deux ─── */
-.mw.has-img { position: relative; }
-.mw.has-img .sc { position: relative; z-index: 1; }
-.mw-img {
-  position: absolute; z-index: 0;
-  left: -0.22em; right: -0.22em; top: 50%;
-  height: 1.18em; margin-top: -0.56em;
-  display: flex;
-  pointer-events: none;
-}
-.mw-img .half {
-  flex: 1 1 50%;
-  background-size: 200% auto; /* même largeur que le mot, hauteur naturelle : pas de déformation */
-  background-repeat: no-repeat;
-  box-shadow: 0 24px 60px rgba(26, 25, 21, 0.28);
+/* ─── Devise : l'image de chaque mot remplit la bande, coupée en deux ─── */
+.s-motto .motto-kicker, .s-motto .motto-track, .s-motto .motto-hint { z-index: 2; }
+body.static .s-motto .motto-kicker, body.static .s-motto .motto-track { position: relative; }
+.motto-stage { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.motto-shot { position: absolute; inset: 0; display: flex; }
+.motto-shot:not(:first-child) { opacity: 0; }
+.motto-shot .half {
+  position: relative; flex: 1 1 50%;
+  overflow: hidden;
   will-change: transform;
 }
-/* chaque moitié montre SA moitié de la même photo : collées, elles la recomposent */
-.mw-img .half.l { background-position: 0% 50%; border-radius: 0.06em 0 0 0.06em; }
-.mw-img .half.r { background-position: 100% 50%; border-radius: 0 0.06em 0.06em 0; }
+/* l'ombre n'apparaît que quand les moitiés s'écartent : recollées, aucun trait au milieu */
+.motto-shot .half.l { box-shadow: 18px 0 60px rgba(26, 25, 21, calc(var(--sh, 0) * 0.3)); z-index: 1; }
+.motto-shot .half.r { box-shadow: -18px 0 60px rgba(26, 25, 21, calc(var(--sh, 0) * 0.3)); }
+/* chaque moitié montre SA moitié de la même photo, cadrée sur la bande
+   prolongée des deux triangles (12vw en haut, 12vw en bas) */
+.motto-shot .half b, .diag.has-img i {
+  position: absolute; left: 0;
+  width: 100%; height: calc(var(--motto-h, 100vh) + 24vw);
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.motto-shot .half b { top: -12vw; width: 200%; }
+.motto-shot .half.r b { left: -100%; }
+/* un voile lime, partout pareil, pour garder la couleur de la bande et lire les mots */
+.motto-stage::after, .diag.has-img::after {
+  content: ''; position: absolute; inset: 0; z-index: 200;
+  background: var(--lime); opacity: 0.22;
+}
+.diag.has-img { background: none; overflow: hidden; }
+.diag.to-lime.has-img { clip-path: polygon(0 100%, 100% 0, 100% 100%); }
+.diag.to-lime.has-img i { top: 0; }
+.diag.from-lime.has-img { clip-path: polygon(0 0, 100% 0, 0 100%); }
+.diag.from-lime.has-img i { bottom: 0; }
 
 /* ─── Étapes : un élément par étape ─── */
 .pstep-ico {

@@ -16,7 +16,7 @@
 
 **`presentation.html`** présente le programme avec le moteur « Site Immersif », et ses boutons ramènent au questionnaire. Les ajouts sont dans `presentation-extras.js` et `.css`, sans modifier `app.js` :
 - **La barre**, la même que celle du questionnaire : logo et nom, partie en cours (« 3 / 8 · Programme »), « S'inscrire », jauge d'avancement.
-- **La devise.** Chaque mot passe devant son image, coupée en deux moitiés qui s'écartent et se recollent au scroll, comme les lettres.
+- **La devise.** L'image de chaque mot remplit toute la bande lime, y compris les deux triangles en haut et en bas. Elle est coupée en deux moitiés verticales : elles se recollent quand le mot passe au centre, puis s'écartent (la gauche monte, la droite descend) pour laisser voir l'image du mot suivant. Les triangles montrent la première et la dernière image, cadrées comme dans la bande, sans raccord.
 - **Les étapes.** Une icône par étape.
 - **La fin.** Le grand logo, révélé en rideau.
 

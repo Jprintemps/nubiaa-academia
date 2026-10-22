@@ -19,19 +19,38 @@
   const sfx = (name) => { if (window.NubiaaSound) window.NubiaaSound.play(name); };
   const icon = (n) => `<svg viewBox="0 0 256 256" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
-  /* ─── 1 · La devise : une image par mot, en deux moitiés ─── */
+  /* ─── 1 · La devise : l'image de chaque mot remplit toute la bande ───
+     Chaque image couvre la bande en entier, triangles compris, et elle
+     est coupée en deux moitiés verticales. Quand son mot passe au centre,
+     les moitiés se recollent ; quand il s'éloigne, elles s'écartent (la
+     gauche monte, la droite descend) et laissent voir l'image suivante.
+     Les deux triangles montrent la première et la dernière image, cadrées
+     exactement comme dans la bande : la photo continue sans raccord. */
   const MOTTO_IMAGES = ['images/motto-batir.jpg', 'images/motto-comprendre.jpg', 'images/motto-montrer.jpg'];
   const words = $$('#mottoTrack .mw');
+  const mottoPin = $('.s-motto .pin');
+  const mottoImg = (i) => MOTTO_IMAGES[i % MOTTO_IMAGES.length];
+  const stage = document.createElement('div');
+  stage.className = 'motto-stage';
+  stage.setAttribute('aria-hidden', 'true');
+  stage.innerHTML = words.map((_, i) =>
+    `<div class="motto-shot"><i class="half l"><b style="background-image:url('${mottoImg(i)}')"></b></i>` +
+    `<i class="half r"><b style="background-image:url('${mottoImg(i)}')"></b></i></div>`).join('');
+  if (mottoPin) mottoPin.prepend(stage);
   const halves = words.map((w, i) => {
-    const box = document.createElement('span');
-    box.className = 'mw-img';
-    box.setAttribute('aria-hidden', 'true');
-    box.innerHTML = `<i class="half l" style="background-image:url('${MOTTO_IMAGES[i % MOTTO_IMAGES.length]}')"></i>` +
-                    `<i class="half r" style="background-image:url('${MOTTO_IMAGES[i % MOTTO_IMAGES.length]}')"></i>`;
-    w.classList.add('has-img');
-    w.prepend(box);
-    return { w, l: box.children[0], r: box.children[1] };
+    const shot = stage.children[i];
+    return { w, shot, l: shot.children[0], r: shot.children[1] };
   });
+  [['.band .diag.to-lime', 0], ['.band .diag.from-lime', words.length - 1]].forEach(([sel, i]) => {
+    const d = $(sel);
+    if (!d || !words.length) return;
+    d.classList.add('has-img');
+    d.innerHTML = `<i style="background-image:url('${mottoImg(i)}')"></i>`;
+  });
+  // les triangles cadrent leur image sur la hauteur réelle de la bande
+  const fitMotto = () => { if (mottoPin) document.documentElement.style.setProperty('--motto-h', mottoPin.offsetHeight + 'px'); };
+  fitMotto();
+  addEventListener('resize', fitMotto);
 
   /* ─── 2 · Les étapes : un élément qui représente chacune ─── */
   const STEP_ICONS = ['clipboard-text-light', 'phone-call-light', 'hourglass-medium-light', 'circuitry-light'];
@@ -182,10 +201,15 @@
         halves.forEach((h, wi) => {
           const r = h.w.getBoundingClientRect();
           const rel = clamp((r.left + r.width / 2 - vw / 2) / vw, -1.3, 1.3);
-          if (Math.abs(rel) < bestD) { bestD = Math.abs(rel); best = wi; }
-          const dy = rel * vh * 0.26, rot = rel * 5;
-          h.l.style.transform = `translate3d(${(-Math.abs(rel) * 18).toFixed(1)}px, ${(-dy).toFixed(1)}px, 0) rotate(${(-rot).toFixed(2)}deg)`;
-          h.r.style.transform = `translate3d(${(Math.abs(rel) * 18).toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${rot.toFixed(2)}deg)`;
+          const d = Math.abs(rel);
+          if (d < bestD) { bestD = d; best = wi; }
+          const dy = rel * vh * 0.62, dx = d * vw * 0.05;
+          h.l.style.transform = `translate3d(${(-dx).toFixed(1)}px, ${(-dy).toFixed(1)}px, 0)`;
+          h.r.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+          // le mot le plus proche du centre passe devant ; les autres s'effacent en s'écartant
+          h.shot.style.zIndex = String(100 - Math.round(d * 50));
+          h.shot.style.setProperty('--sh', Math.min(d * 6, 1).toFixed(3));
+          h.shot.style.opacity = clamp(1 - (d - 0.2) / 0.28, 0, 1).toFixed(3);
         });
         // les deux moitiés se recollent au centre : « clac » ; elles repartent : glissé
         if (best !== activeWord) { sfx(best >= 0 ? 'snap' : 'split'); activeWord = best; }
